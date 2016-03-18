@@ -1,0 +1,13 @@
+{{- define "error" -}}
+{{- template "header" . -}}
+        <div class="container container-table">
+            <div class="row">
+                <h2>Error {{ .Code -}}</h2>
+				<div class="alert alert-danger">
+					{{- if .Title -}}<strong>{{- .Title -}}</strong>{{- end }}
+					{{- if .Text -}}<p>{{- .Text -}}</p>{{- end }}
+				</div>
+            </div>
+        </div>
+{{- template "footer" . -}}
+{{- end -}}
