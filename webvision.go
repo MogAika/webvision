@@ -11,6 +11,7 @@ func main() {
 
 	s := &app.AppSettings{
 		DataPath: "./data/",
+		Secret:   "aegasnjp9r8hO2da",
 		DB: app.AppDBSettings{
 			Dialect: "sqlite3",
 			Params:  "_test.db",

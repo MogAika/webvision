@@ -6,19 +6,24 @@ import (
 	"os"
 
 	"github.com/alexcesaro/log"
+	"github.com/gorilla/context"
 	gorillahandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/jinzhu/gorm"
 
 	"github.com/mogaika/webvision/handlers"
 	"github.com/mogaika/webvision/models"
+	"github.com/mogaika/webvision/views"
 )
 
 type App struct {
-	DB  *gorm.DB
-	Log log.Logger
-
+	DB       *gorm.DB
+	Log      log.Logger
 	Settings *AppSettings
+
+	CookieStore *sessions.CookieStore
+	Handlers    http.Handler
 }
 
 type AppWebSettings struct {
@@ -38,12 +43,18 @@ type AppSettings struct {
 	DataPath string
 	DB       AppDBSettings
 	Web      AppWebSettings
+	Secret   string
 }
 
 func NewApp(s *AppSettings, log log.Logger) (a *App, err error) {
 	a = &App{
-		Log:      log,
-		Settings: s,
+		Log:         log,
+		Settings:    s,
+		CookieStore: sessions.NewCookieStore([]byte(s.Secret)),
+	}
+
+	if err = views.InitTemplates(); err != nil {
+		return
 	}
 
 	a.DB, err = gorm.Open(s.DB.Dialect, s.DB.Params)
@@ -64,6 +75,22 @@ func NewApp(s *AppSettings, log log.Logger) (a *App, err error) {
 	return a, a.InitHttp()
 }
 
+func (a *App) Handler(h http.Handler) http.Handler {
+	a.Handlers = h
+	return a
+}
+
+func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	context.Set(r, "db", a.DB)
+	context.Set(r, "cookiestore", a.CookieStore)
+	context.Set(r, "app", a)
+	context.Set(r, "log", a.Log)
+
+	a.Handlers.ServeHTTP(w, r)
+
+	context.Clear(r)
+}
+
 func (a *App) InitHttp() error {
 	r := mux.NewRouter()
 
@@ -71,11 +98,13 @@ func (a *App) InitHttp() error {
 		r.Host(a.Settings.Web.Url)
 	}
 
-	r.HandleFunc("/", handlers.NotImplemented)
-	r.HandleFunc("/data/{id:[0-9]+}", handlers.NotImplemented)
-	r.HandleFunc("/upload", handlers.NotImplemented)
-	r.HandleFunc("/statews", handlers.NotImplemented)
-	r.HandleFunc("/statews", handlers.NotImplemented)
+	r.NotFoundHandler = &NotFoundHandler{}
+
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+
+	r.HandleFunc("/", handlers.HandlerNotImplemented)
+	r.HandleFunc("/data/{id:[0-9]+}", handlers.HandlerNotImplemented)
+	r.HandleFunc("/upload", handlers.HandlerNotImplemented)
 
 	h := gorillahandlers.RecoveryHandler()(r)
 
@@ -94,4 +123,10 @@ func (a *App) InitHttp() error {
 	}
 
 	return nil
+}
+
+type NotFoundHandler struct{}
+
+func (NotFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	handlers.HandlerNotFound(w, r)
 }
