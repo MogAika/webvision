@@ -29,7 +29,16 @@ func (md *Media) New(db *gorm.DB, ftype string, fsize int64) (*Media, error) {
 	return md, db.Create(md).Error
 }
 
-func (md *Media) LoadFile(db *gorm.DB, file string) error {
+func (md *Media) SetFile(db *gorm.DB, file, hash string, thumbnail *string) error {
+	upd := map[string]interface{}{
+		"file":      &file,
+		"hash":      hash,
+		"thumbnail": thumbnail,
+	}
 
-	return nil
+	return db.Model(md).Updates(upd).Error
+}
+
+func (md *Media) AddTag(db *gorm.DB, tag *Tag) error {
+	return db.Model(md).Association("Tags").Append(tag).Error
 }
