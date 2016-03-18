@@ -11,20 +11,25 @@ type Media struct {
 	CreatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
 
-	Type string  `xorm:"not null varchar(64)"`
-	Hash string  `xorm:"not null varchar(24)"`
-	Size int64   `xorm:"not null"`
-	Path *string `xorm:"varchar(256)"`
+	Type      string  `xorm:"not null varchar(64)"`
+	Hash      string  `xorm:"not null varchar(24)"`
+	Size      int64   `xorm:"not null"`
+	File      *string `xorm:"varchar(256)"`
+	Thumbnail *string `xorm:"varchar(256)"`
 
 	Tags []Tag `gorm:"many2many:m2m_media_tag;"`
 }
 
-func (md *Media) New(db *gorm.DB, ftype, fhash string, fsize int64) (*Media, error) {
+func (md *Media) New(db *gorm.DB, ftype string, fsize int64) (*Media, error) {
 	md = &Media{
 		Type: ftype,
-		Hash: fhash,
 		Size: fsize,
 	}
 
 	return md, db.Create(md).Error
+}
+
+func (md *Media) LoadFile(db *gorm.DB, file string) error {
+
+	return nil
 }

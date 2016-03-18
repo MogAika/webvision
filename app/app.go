@@ -1,11 +1,8 @@
 package app
 
 import (
-	_log "log"
 	"net/http"
-	"os"
 
-	"github.com/alexcesaro/log"
 	"github.com/gorilla/context"
 	gorillahandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -13,13 +10,13 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"github.com/mogaika/webvision/handlers"
+	"github.com/mogaika/webvision/log"
 	"github.com/mogaika/webvision/models"
 	"github.com/mogaika/webvision/views"
 )
 
 type App struct {
 	DB       *gorm.DB
-	Log      log.Logger
 	Settings *AppSettings
 
 	CookieStore *sessions.CookieStore
@@ -46,9 +43,8 @@ type AppSettings struct {
 	Secret   string
 }
 
-func NewApp(s *AppSettings, log log.Logger) (a *App, err error) {
+func NewApp(s *AppSettings) (a *App, err error) {
 	a = &App{
-		Log:         log,
 		Settings:    s,
 		CookieStore: sessions.NewCookieStore([]byte(s.Secret)),
 	}
@@ -62,15 +58,15 @@ func NewApp(s *AppSettings, log log.Logger) (a *App, err error) {
 		return
 	}
 
-	a.DB.SetLogger(_log.New(os.Stdout, "", _log.LstdFlags))
-	if log.LogInfo() {
+	a.DB.SetLogger(log.NewGormLogger(log.Log))
+	if log.Log.LogInfo() {
 		a.DB.LogMode(true)
 	}
 
-	log.Info("Initializing db")
+	log.Log.Info("Initializing db")
 	models.Init(a.DB)
 
-	log.Info("Starting server")
+	log.Log.Info("Starting server")
 
 	return a, a.InitHttp()
 }
@@ -84,7 +80,6 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	context.Set(r, "db", a.DB)
 	context.Set(r, "cookiestore", a.CookieStore)
 	context.Set(r, "app", a)
-	context.Set(r, "log", a.Log)
 
 	a.Handlers.ServeHTTP(w, r)
 

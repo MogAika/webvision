@@ -1,14 +1,11 @@
 package main
 
 import (
-	"github.com/alexcesaro/log/stdlog"
-
 	"github.com/mogaika/webvision/app"
+	"github.com/mogaika/webvision/log"
 )
 
 func main() {
-	log := stdlog.GetFromFlags()
-
 	s := &app.AppSettings{
 		DataPath: "./data/",
 		Secret:   "aegasnjp9r8hO2da",
@@ -25,8 +22,8 @@ func main() {
 		},
 	}
 
-	_, err := app.NewApp(s, log)
+	_, err := app.NewApp(s)
 	if err != nil {
-		log.Errorf("Application error: %v\n", err)
+		log.Log.Errorf("Application error: %v\n", err)
 	}
 }
