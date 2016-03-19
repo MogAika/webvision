@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/context"
-	gorillahandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/jinzhu/gorm"
@@ -97,11 +96,11 @@ func (a *App) InitHttp() error {
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 
-	r.HandleFunc("/", handlers.HandlerNotImplemented)
+	r.HandleFunc("/", handlers.HandlerBrowse)
 	r.HandleFunc("/data/{id:[0-9]+}", handlers.HandlerNotImplemented)
-	r.HandleFunc("/upload", handlers.HandlerNotImplemented)
+	r.HandleFunc("/upload", handlers.HandlerUpload)
 
-	h := gorillahandlers.RecoveryHandler()(r)
+	h := r
 
 	host := a.Settings.Web.Host
 

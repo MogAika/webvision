@@ -1,6 +1,6 @@
 package models
 
 type Tag struct {
-	ID   int
+	ID   uint64
 	Name string
 }

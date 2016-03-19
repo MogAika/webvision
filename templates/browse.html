@@ -1,0 +1,48 @@
+{{- define "browse" -}}
+{{- template "header" . -}}
+
+<div class="progress progress-striped active">
+	<div class="progress-bar" id="ws-upload-progress" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+	</div>
+</div>
+<script>
+wsUpoladProgress = function(v) {
+	$("#ws-upload-progress").css('width', v+'%').attr('aria-valuenow', v).text(v + " %"); 
+}
+
+wsUpload = function(obj) {
+	var fd = new FormData();
+	var files = $("#ws-upload-file")[0].files;
+	if (!files.length) {
+		return;
+	}
+	fd.append('heh', files[0]);
+
+	$.ajax({
+		xhr: function() {
+			var xhr = new window.XMLHttpRequest();
+			xhr.upload.addEventListener("progress", function(evt) {
+				if (evt.lengthComputable) {
+					var percentComplete = evt.loaded / evt.total;
+					percentComplete = parseInt(percentComplete * 100);
+					wsUpoladProgress(percentComplete);
+				}
+			}, false);
+			return xhr;
+		},
+		url: "/upload",
+		type: "POST",
+		data: fd,
+		processData: false,
+		contentType: false, 
+		mimeType: 'multipart/form-data', 
+		error:  function(result) {
+			console.log(result);
+		},
+	});
+}
+</script>
+<input id="ws-upload-file" type="file" name="heh">
+<button type="button" onclick="wsUpload(this);">Send</button>
+{{- template "footer" . -}}
+{{- end -}}

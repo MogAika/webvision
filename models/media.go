@@ -7,7 +7,7 @@ import (
 )
 
 type Media struct {
-	ID        uint `gorm:"primary_key"`
+	ID        uint64 `gorm:"primary_key"`
 	CreatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
 
@@ -16,6 +16,8 @@ type Media struct {
 	Size      int64   `xorm:"not null"`
 	File      *string `xorm:"varchar(256)"`
 	Thumbnail *string `xorm:"varchar(256)"`
+	Likes     int64   `xorm:"not null"`
+	Dislikes  int64   `xorm:"not null"`
 
 	Tags []Tag `gorm:"many2many:m2m_media_tag;"`
 }
@@ -41,4 +43,10 @@ func (md *Media) SetFile(db *gorm.DB, file, hash string, thumbnail *string) erro
 
 func (md *Media) AddTag(db *gorm.DB, tag *Tag) error {
 	return db.Model(md).Association("Tags").Append(tag).Error
+}
+
+func (md *Media) GetTags(db *gorm.DB) (error, []Tag) {
+	var tags []Tag
+	err := db.Model(md).Association("Tags").Find(&tags).Error
+	return err, tags
 }
