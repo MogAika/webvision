@@ -3,17 +3,18 @@ package main
 import (
 	"github.com/mogaika/webvision/app"
 	"github.com/mogaika/webvision/log"
+	"github.com/mogaika/webvision/settings"
 )
 
 func main() {
-	s := &app.AppSettings{
-		DataPath: "./data/",
-		Secret:   "aegasnjp9r8hO2da",
-		DB: app.AppDBSettings{
+	s := &settings.Settings{
+		DataPath:    "./data/",
+		MaxDataSize: 1024 * 1024 * 128, // 128 Mbytes
+		DB: settings.DBSettings{
 			Dialect: "sqlite3",
 			Params:  "_test.db",
 		},
-		Web: app.AppWebSettings{
+		Web: settings.WebSettings{
 			Host:        "127.0.0.1:8080",
 			Url:         "",
 			Tls:         true,

@@ -5,47 +5,24 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/jinzhu/gorm"
 
 	"github.com/mogaika/webvision/handlers"
 	"github.com/mogaika/webvision/log"
 	"github.com/mogaika/webvision/models"
+	"github.com/mogaika/webvision/settings"
 	"github.com/mogaika/webvision/views"
 )
 
 type App struct {
 	DB       *gorm.DB
-	Settings *AppSettings
-
-	CookieStore *sessions.CookieStore
-	Handlers    http.Handler
+	Settings *settings.Settings
+	Handlers http.Handler
 }
 
-type AppWebSettings struct {
-	Host        string // 0.0.0.0:8080
-	Url         string // https://www.url.com
-	Tls         bool
-	TlsCertFile string
-	TlsKeyFile  string
-}
-
-type AppDBSettings struct {
-	Dialect string
-	Params  interface{}
-}
-
-type AppSettings struct {
-	DataPath string
-	DB       AppDBSettings
-	Web      AppWebSettings
-	Secret   string
-}
-
-func NewApp(s *AppSettings) (a *App, err error) {
+func NewApp(s *settings.Settings) (a *App, err error) {
 	a = &App{
-		Settings:    s,
-		CookieStore: sessions.NewCookieStore([]byte(s.Secret)),
+		Settings: s,
 	}
 
 	if err = views.InitTemplates(); err != nil {
@@ -77,7 +54,7 @@ func (a *App) Handler(h http.Handler) http.Handler {
 
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	context.Set(r, "db", a.DB)
-	context.Set(r, "cookiestore", a.CookieStore)
+	context.Set(r, "settings", a.Settings)
 	context.Set(r, "app", a)
 
 	a.Handlers.ServeHTTP(w, r)
@@ -101,7 +78,7 @@ func (a *App) InitHttp() error {
 	r.HandleFunc("/upload", handlers.HandlerUploadGet).Methods("GET")
 	r.HandleFunc("/upload", handlers.HandlerUploadPost).Methods("POST")
 
-	h := r
+	h := a.Handler(r)
 
 	host := a.Settings.Web.Host
 

@@ -11,8 +11,8 @@ type Media struct {
 	CreatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
 
-	Type      string  `xorm:"not null varchar(64)"`
-	Hash      string  `xorm:"not null varchar(24)"`
+	Type      string  `xorm:"not null varchar(128)"`
+	Hash      string  `xorm:"not null varchar(32)"`
 	Size      int64   `xorm:"not null"`
 	File      string  `xorm:"varchar(256)"`
 	Thumbnail *string `xorm:"varchar(256)"`
@@ -31,6 +31,10 @@ func (md *Media) New(db *gorm.DB, file, hash, ftype string, fsize int64, thumbna
 		Thumbnail: thumbnail,
 	}
 	return md, db.Create(md).Error
+}
+
+func (md *Media) GetByHash(db *gorm.DB, hash string) (*Media, error) {
+	return md, db.Where(&Media{Hash: hash}).First(md).Error
 }
 
 func (md *Media) TagsAdd(db *gorm.DB, tag *Tag) error {
