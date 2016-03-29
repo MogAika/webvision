@@ -95,10 +95,11 @@ func (a *App) InitHttp() error {
 	r.NotFoundHandler = &NotFoundHandler{}
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+	r.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir(a.Settings.DataPath))))
 
 	r.HandleFunc("/", handlers.HandlerBrowse)
-	r.HandleFunc("/data/{id:[0-9]+}", handlers.HandlerNotImplemented)
-	r.HandleFunc("/upload", handlers.HandlerUpload)
+	r.HandleFunc("/upload", handlers.HandlerUploadGet).Methods("GET")
+	r.HandleFunc("/upload", handlers.HandlerUploadPost).Methods("POST")
 
 	h := r
 

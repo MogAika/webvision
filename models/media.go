@@ -14,7 +14,7 @@ type Media struct {
 	Type      string  `xorm:"not null varchar(64)"`
 	Hash      string  `xorm:"not null varchar(24)"`
 	Size      int64   `xorm:"not null"`
-	File      *string `xorm:"varchar(256)"`
+	File      string  `xorm:"varchar(256)"`
 	Thumbnail *string `xorm:"varchar(256)"`
 	Likes     int64   `xorm:"not null"`
 	Dislikes  int64   `xorm:"not null"`
@@ -22,31 +22,27 @@ type Media struct {
 	Tags []Tag `gorm:"many2many:m2m_media_tag;"`
 }
 
-func (md *Media) New(db *gorm.DB, ftype string, fsize int64) (*Media, error) {
+func (md *Media) New(db *gorm.DB, file, hash, ftype string, fsize int64, thumbnail *string) (*Media, error) {
 	md = &Media{
-		Type: ftype,
-		Size: fsize,
+		File:      file,
+		Hash:      hash,
+		Type:      ftype,
+		Size:      fsize,
+		Thumbnail: thumbnail,
 	}
-
 	return md, db.Create(md).Error
 }
 
-func (md *Media) SetFile(db *gorm.DB, file, hash string, thumbnail *string) error {
-	upd := map[string]interface{}{
-		"file":      &file,
-		"hash":      hash,
-		"thumbnail": thumbnail,
-	}
-
-	return db.Model(md).Updates(upd).Error
-}
-
-func (md *Media) AddTag(db *gorm.DB, tag *Tag) error {
+func (md *Media) TagsAdd(db *gorm.DB, tag *Tag) error {
 	return db.Model(md).Association("Tags").Append(tag).Error
 }
 
-func (md *Media) GetTags(db *gorm.DB) (error, []Tag) {
+func (md *Media) TagsGet(db *gorm.DB) (error, []Tag) {
 	var tags []Tag
 	err := db.Model(md).Association("Tags").Find(&tags).Error
 	return err, tags
+}
+
+func (md *Media) TagsRemove(db *gorm.DB, tag *Tag) error {
+	return db.Model(md).Association("Tags").Delete(tag).Error
 }

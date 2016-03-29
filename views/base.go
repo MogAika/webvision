@@ -12,6 +12,7 @@ func InitTemplates() (err error) {
 		"templates/index.html",
 		"templates/errors.html",
 		"templates/browse.html",
+		"templates/upload.html",
 	)
 	return
 }
