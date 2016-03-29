@@ -33,8 +33,13 @@ func (md *Media) New(db *gorm.DB, file, hash, ftype string, fsize int64, thumbna
 	return md, db.Create(md).Error
 }
 
-func (md *Media) GetByHash(db *gorm.DB, hash string) (*Media, error) {
-	return md, db.Where(&Media{Hash: hash}).First(md).Error
+func (md *Media) GetByHash(db *gorm.DB, hash string) (*Media, bool, error) {
+	err := db.Where(&Media{Hash: hash}).First(md).Error
+	if err == gorm.ErrRecordNotFound {
+		return md, false, nil
+	} else {
+		return md, true, err
+	}
 }
 
 func (md *Media) TagsAdd(db *gorm.DB, tag *Tag) error {
@@ -43,8 +48,7 @@ func (md *Media) TagsAdd(db *gorm.DB, tag *Tag) error {
 
 func (md *Media) TagsGet(db *gorm.DB) (error, []Tag) {
 	var tags []Tag
-	err := db.Model(md).Association("Tags").Find(&tags).Error
-	return err, tags
+	return db.Model(md).Association("Tags").Find(&tags).Error, tags
 }
 
 func (md *Media) TagsRemove(db *gorm.DB, tag *Tag) error {

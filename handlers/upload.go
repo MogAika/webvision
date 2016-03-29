@@ -24,6 +24,7 @@ import (
 var nextTempFileId uint32 = rand.Uint32()
 
 var ErrAlreadyUploaded = errors.New("File alrady uploaded on server")
+var ErrIncorrectContentType = errors.New("Server do not support uploading of this type of files")
 
 func isContentType(ct string) bool {
 	return len(ct) != 0 && strings.ToLower(ct) != "application/octet-stream" && strings.IndexRune(ct, '/') != 0
@@ -51,8 +52,11 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 			return nil, err
 		}
 
-		if step == 0 && !isContentType(contenttype) {
-			contenttype = http.DetectContentType(buffer[:readcount])
+		if step == 0 {
+			detected_ctype := http.DetectContentType(buffer[:readcount])
+			if !isContentType(detected_ctype) {
+				contenttype = detected_ctype
+			}
 		}
 
 		fsize += int64(readcount)
@@ -69,15 +73,23 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 	}
 	of.Close()
 
-	hash := base64.URLEncoding.EncodeToString(hmd5.Sum(nil))[0:22] // len(md5) == 22
-	log.Log.Info(len(hash), hash)
+	mediatype := strings.ToLower(strings.SplitN(contenttype, "/", 2)[0])
 
-	model, err := (&models.Media{}).GetByHash(db, hash)
-	if err != nil {
-		return nil, err
+	switch mediatype {
+	case "video", "audio", "image":
+	default:
+		log.Log.Info(mediatype)
+		return nil, ErrIncorrectContentType
 	}
 
-	if model.ID != 0 {
+	hash := base64.URLEncoding.EncodeToString(hmd5.Sum(nil))[0:22] // len(md5) == 22
+
+	model, exists, err := (&models.Media{}).GetByHash(db, hash)
+	if err != nil {
+		return nil, fmt.Errorf("Media selecting gorm error: %v\n", err)
+	}
+
+	if exists {
 		return model, ErrAlreadyUploaded
 	}
 
@@ -91,7 +103,13 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 		return nil, err
 	}
 
-	return model.New(db, filename, hash, contenttype, fsize, nil)
+	var thumb *string = nil
+
+	model, err = model.New(db, filename, hash, contenttype, fsize, thumb)
+	if err != nil {
+		return nil, fmt.Errorf("Media creating gorm error: %v\n", err)
+	}
+	return model, nil
 }
 
 func HandlerUploadGet(w http.ResponseWriter, r *http.Request) {
@@ -111,6 +129,8 @@ func HandlerUploadPost(w http.ResponseWriter, r *http.Request) {
 			views.ViewError(w, 200, "Uploaded", fh.Filename+" uploaded. Type: "+model.Type)
 		} else if err == ErrAlreadyUploaded {
 			views.ViewError(w, 200, "File already uploaded", "")
+		} else if err == ErrIncorrectContentType {
+			views.ViewError(w, 200, "Server accept only pictures/images/audios", "")
 		} else {
 			log.Log.Errorf("Error processing file \"%s\": %v", fh.Filename, err)
 			views.ViewError(w, 500, "Error", "Error processing file on server side")
