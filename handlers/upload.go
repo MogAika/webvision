@@ -15,7 +15,6 @@ import (
 	"sync/atomic"
 
 	"github.com/jinzhu/gorm"
-	"github.com/mogaika/webvision/log"
 	"github.com/mogaika/webvision/models"
 	"github.com/mogaika/webvision/settings"
 	"github.com/mogaika/webvision/views"
@@ -23,8 +22,8 @@ import (
 
 var nextTempFileId uint32 = rand.Uint32()
 
-var ErrAlreadyUploaded = errors.New("File alrady uploaded on server")
-var ErrIncorrectContentType = errors.New("Server do not support uploading of this type of files")
+var ErrAlreadyUploaded = errors.New("File already uploaded on server")
+var ErrIncorrectContentType = errors.New("Server support only image/video/audio files")
 
 func isContentType(ct string) bool {
 	return len(ct) != 0 && strings.ToLower(ct) != "application/octet-stream" && strings.IndexRune(ct, '/') != 0
@@ -78,7 +77,6 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 	switch mediatype {
 	case "video", "audio", "image":
 	default:
-		log.Log.Info(mediatype)
 		return nil, ErrIncorrectContentType
 	}
 
@@ -93,7 +91,7 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 		return model, ErrAlreadyUploaded
 	}
 
-	filename := path.Join(path.Dir(set.DataPath), hash[:1], hash[1:])
+	filename := path.Join(path.Dir(set.DataPath), hash[:1], fmt.Sprintf("%c_%s", mediatype[0], hash[1:]))
 
 	if err = os.MkdirAll(path.Dir(filename), 0666); err != nil {
 		return nil, err
@@ -124,16 +122,11 @@ func HandlerUploadPost(w http.ResponseWriter, r *http.Request) {
 
 	if err == nil {
 		defer f.Close()
-		model, err := ProcessFile(db, f, fh.Header.Get("Content-Type"), set)
+		_, err := ProcessFile(db, f, fh.Header.Get("Content-Type"), set)
 		if err == nil {
-			views.ViewError(w, 200, "Uploaded", fh.Filename+" uploaded. Type: "+model.Type)
-		} else if err == ErrAlreadyUploaded {
-			views.ViewError(w, 200, "File already uploaded", "")
-		} else if err == ErrIncorrectContentType {
-			views.ViewError(w, 200, "Server accept only pictures/images/audios", "")
+			views.ViewUploadResult(w, "")
 		} else {
-			log.Log.Errorf("Error processing file \"%s\": %v", fh.Filename, err)
-			views.ViewError(w, 500, "Error", "Error processing file on server side")
+			views.ViewUploadResult(w, err.Error())
 		}
 	} else {
 		views.ViewError(w, 500, "Error", err.Error())
