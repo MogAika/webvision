@@ -1,25 +1,38 @@
-wsUpoladProgress = function(v) {
-	$("#ws-upload-progress").css('width', v+'%').attr('value', v).text(parseInt(v) + " %")
-		.removeClass("progress-success").removeClass("progress-danger").addClass("progress-info");
+wsUpoladProgress = function(s, v) {
+	s.find("progress").css('width', v+'%').attr('value', v);
 }
-wsEndProgress = function() {
-	$("#ws-upload-progress").css('width', 100+'%').attr('value', 100).text("Uploaded")
-		.removeClass("progress-danger").removeClass("progress-info").addClass("progress-success");
+wsEndProgress = function(s) {
+	s.find("progress").css('width', 100+'%').attr('value', 100).addClass("progress-success");
+	s.find(".file_status").removeClass("text-primary").addClass("text-success").text("Uploaded");
 }
-wsErrorProgress = function(v) {
-	$("#ws-upload-progress").css('width', 100+'%').attr('value', 100).text(v)
-		.removeClass("progress-success").removeClass("progress-info").addClass("progress-danger");
+wsErrorProgress = function(s, v) {
+	s.find("progress").css('width', 100+'%').attr('value', 100).addClass("progress-danger");
+	s.find(".file_status").removeClass("text-primary").addClass("text-danger").text("Error:" + v);
 }
 
-wsUpload = function(obj) {
+wsGetUploadElement = function(fname) {
+	return $('<div class="upload">\
+			<div class="row">\
+				<div class="col-xs-6 text-xs-right file_name">' + fname + '</div>\
+				<div class="col-xs-6 text-xs-left text-primary file_status">Uploading</div>\
+			</div>\
+			<div class="row">\
+				<div class="col-xs-12">\
+					<progress class="progress-striped progress" value="0" max="100"></progress>\
+				</div>\
+			</div>\
+		</div>');
+}
+
+wsUploadFile = function(file) {
 	var fd = new FormData();
-	var files = $("#ws-upload-file")[0].files;
-	if (!files.length) {
-		return;
-	}
-	fd.append('heh', files[0]);
-
-	wsUpoladProgress(0);
+	
+	fd.append('heh', file);
+	
+	var row = wsGetUploadElement(file.name);
+	
+	$("#uploads").append(row);
+	
 	$.ajax({
 		xhr: function() {
 			var xhr = new window.XMLHttpRequest();
@@ -27,7 +40,7 @@ wsUpload = function(obj) {
 				if (evt.lengthComputable) {
 					var percentComplete = evt.loaded / evt.total;
 					percentComplete = percentComplete * 100;
-					wsUpoladProgress(percentComplete);
+					wsUpoladProgress(row, percentComplete);
 				}
 			}, false);
 			return xhr;
@@ -39,16 +52,27 @@ wsUpload = function(obj) {
 		contentType: false, 
 		mimeType: 'multipart/form-data', 
 		fail: function(result) {
-			console.log(result);
-			wsErrorProgress(result);
+			wsErrorProgress(row, result);
 		},
 		success: function(data) {
-			console.log(data);
+			console.log("success", data);
 			if (data != "") {
-				wsErrorProgress(data);
+				wsErrorProgress(row, data);
 			} else {
-				wsEndProgress();
+				wsEndProgress(row);
 			}
 		},
 	});
+}
+
+wsUpload = function(obj) {
+	var files = $("#ws-upload-file")[0].files;
+	
+	if (!files.length) {
+		return;
+	}
+	
+	for (var i = 0; i < files.length; i++) {
+		wsUploadFile(files[i]);
+	}
 }

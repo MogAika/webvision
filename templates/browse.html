@@ -1,8 +1,10 @@
 {{- define "browse" -}}
 {{- template "header" . -}}
-	<link href="/static/browse.css" rel="stylesheet">
-</head><body>
-	<div class="container">
-	</div>
+<link href="/static/browse.css" rel="stylesheet">
+</head><body id="ws-browse-page">
+<div class="container">
+	<div id="ws-browse-trigger"></div>
+</div>
+<script src="/static/browse.js"></script>
 {{- template "footer" . -}}
 {{- end -}}
