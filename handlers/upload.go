@@ -10,6 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 	"sync/atomic"
@@ -28,6 +29,26 @@ var ErrIncorrectContentType = errors.New("Server support only image/video/audio 
 
 func isContentType(ct string) bool {
 	return len(ct) != 0 && strings.ToLower(ct) != "application/octet-stream" && strings.IndexRune(ct, '/') != 0
+}
+
+func generateThumb(set *settings.Settings, fname, ctype string) (path *string, err error) {
+	switch ctype {
+	case "video":
+		videothumb := fname + ".png"
+		cmd := exec.Command(set.FFmpeg, "-i", fname, "-vf", "scale=w='min(640\\, iw):h=min(480\\, ih)'", "-vframes", "1", videothumb)
+		err = cmd.Start()
+		if err != nil {
+			log.Log.Errorf("Error create process %v (file %s:%s)", cmd, ctype, fname)
+			return
+		}
+		err = cmd.Wait()
+		if err != nil {
+			log.Log.Errorf("Error wait process %v (file %s:%s)", cmd, ctype, fname)
+			return
+		}
+		return &videothumb, nil
+	}
+	return
 }
 
 func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settings.Settings) (*models.Media, error) {
@@ -119,13 +140,22 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 	}
 	tempneedremove = false
 
-	var thumb *string = nil
+	thumb, err := generateThumb(set, filename, mediatype)
+	if err != nil {
+		log.Log.Errorf("Error generating thumb for file %s: %v", filename, err)
+	}
 
 	model, err = model.New(db, filename, hash, contenttype, fsize, thumb)
 	if err != nil {
 		remerr := os.Remove(filename)
 		if remerr != nil {
-			log.Log.Errorf("Error removing not media file: %v", remerr)
+			log.Log.Errorf("Error removing not media file %s: %v", filename, remerr)
+		}
+		if thumb != nil {
+			remerr = os.Remove(*thumb)
+			if remerr != nil {
+				log.Log.Errorf("Error removing thumb file %s: %v", *thumb, remerr)
+			}
 		}
 		return nil, fmt.Errorf("Media creating gorm error: %v\n", err)
 	}

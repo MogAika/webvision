@@ -33,6 +33,16 @@ func (md *Media) New(db *gorm.DB, file, hash, ftype string, fsize int64, thumbna
 	return md, db.Create(md).Error
 }
 
+func (md *Media) Get(db *gorm.DB, limit int) ([]Media, error) {
+	var media []Media
+	return media, db.Model(md).Limit(limit).Order("id DESC").Find(&media).Error
+}
+
+func (md *Media) GetTo(db *gorm.DB, last_id int, limit int) ([]Media, error) {
+	var media []Media
+	return media, db.Model(md).Where("id < ?", last_id).Limit(limit).Order("id DESC").Find(&media).Error
+}
+
 func (md *Media) GetByHash(db *gorm.DB, hash string) (*Media, bool, error) {
 	err := db.Where(&Media{Hash: hash}).First(md).Error
 	if err == gorm.ErrRecordNotFound {

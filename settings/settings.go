@@ -15,6 +15,7 @@ type DBSettings struct {
 
 type Settings struct {
 	DataPath    string
+	FFmpeg      string
 	DB          DBSettings
 	Web         WebSettings
 	Secret      string

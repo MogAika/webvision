@@ -1,5 +1,5 @@
 {{- define "upload" -}}
-{{- template "header" . -}}
+{{- template "global-header" . -}}
 </head><body id="ws-upload-page">
 <div class="container">
 	<div class="row">
@@ -13,6 +13,7 @@
 	</div>
 	<div id="uploads"></div>
 </div>
+{{- template "global-scripts" . -}}
 <script src="/static/upload.js"></script>
-{{- template "footer" . -}}
+{{- template "global-footer" . -}}
 {{- end -}}

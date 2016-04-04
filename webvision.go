@@ -9,6 +9,7 @@ import (
 func main() {
 	s := &settings.Settings{
 		DataPath:    "./data/",
+		FFmpeg:      "../ffmpeg-20160404-git-54c9146-win64-static/bin/ffmpeg.exe",
 		MaxDataSize: 1024 * 1024 * 128, // 128 Mbytes
 		DB: settings.DBSettings{
 			Dialect: "sqlite3",

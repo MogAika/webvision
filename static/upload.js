@@ -46,7 +46,7 @@ wsUploadFile = function(file) {
 			return xhr;
 		},
 		url: "/upload",
-		type: "POST",
+		method: "post",
 		data: fd,
 		processData: false,
 		contentType: false, 

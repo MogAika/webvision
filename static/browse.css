@@ -10,6 +10,11 @@ body {
     background: black;
 }
 
+.ws-data-video {
+    padding: 0;
+    margin: 0;
+}
+
 .ws-data-video video {
     display: block;
     width: 100%;
@@ -31,44 +36,6 @@ body {
     min-height: 12em;
 }
 
-.ws-controls {
-    height: 2.2em;
-}
-
-.ws-controls button {
-    display: block;
-    float: left;
-    height: 100%;
-    width: 25%;
-    border: none;
-    color: #d1d1d1;
-}
-
-.ws-controls:after {
-    display: block;
-    visibility: visible;
-    content: ' ';
-    clear: both;
-}
-
-.ws-controls .ws-control-download { background-color: #262626; }
-.ws-controls .ws-control-download:hover { background-color: #404040; }
-
-.ws-controls .ws-control-open { background-color: #625265; }
-.ws-controls .ws-control-open:hover { background-color: #77657b; }
-
-.ws-controls .ws-control-like { background-color: #224d2f; }
-.ws-controls .ws-control-like:hover { background-color: #2c643d; }
-
-.ws-controls .ws-control-dislike { background-color: #4d2222; }
-.ws-controls .ws-control-dislike:hover { background-color: #642a2a; }
-
-.ws-controls .ws-control-active {
-    font-weight: bold;
-    color: white;
-}
-
-.ws-data-video {
-    padding: 0;
-    margin: 0;
+.ws-trigger-requested {
+	
 }
