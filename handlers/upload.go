@@ -15,6 +15,7 @@ import (
 	"sync/atomic"
 
 	"github.com/jinzhu/gorm"
+	"github.com/mogaika/webvision/log"
 	"github.com/mogaika/webvision/models"
 	"github.com/mogaika/webvision/settings"
 	"github.com/mogaika/webvision/views"
@@ -36,7 +37,20 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 	if err != nil {
 		return nil, err
 	}
-	defer of.Close()
+
+	tempneedclose := true
+	tempneedremove := true
+	defer func() {
+		if tempneedclose {
+			of.Close()
+		}
+		if tempneedremove {
+			err := os.Remove(tempFileName)
+			if err != nil {
+				log.Log.Errorf("Error removing tempfile: %v", err)
+			}
+		}
+	}()
 
 	var fsize int64
 	var buffer []byte = make([]byte, 1024*128) // 128 kbytes
@@ -53,7 +67,7 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 
 		if step == 0 {
 			detected_ctype := http.DetectContentType(buffer[:readcount])
-			if !isContentType(detected_ctype) {
+			if isContentType(detected_ctype) {
 				contenttype = detected_ctype
 			}
 		}
@@ -70,6 +84,8 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 			return nil, wrerr
 		}
 	}
+
+	tempneedclose = false
 	of.Close()
 
 	mediatype := strings.ToLower(strings.SplitN(contenttype, "/", 2)[0])
@@ -77,10 +93,11 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 	switch mediatype {
 	case "video", "audio", "image":
 	default:
+		log.Log.Infof("Aborted content type %v", contenttype)
 		return nil, ErrIncorrectContentType
 	}
 
-	hash := base64.URLEncoding.EncodeToString(hmd5.Sum(nil))[0:22] // len(md5) == 22
+	hash := base64.URLEncoding.EncodeToString(hmd5.Sum(nil))[0:22] // len(base64(md5)) == 22
 
 	model, exists, err := (&models.Media{}).GetByHash(db, hash)
 	if err != nil {
@@ -100,11 +117,16 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 	if err = os.Rename(tempFileName, filename); err != nil {
 		return nil, err
 	}
+	tempneedremove = false
 
 	var thumb *string = nil
 
 	model, err = model.New(db, filename, hash, contenttype, fsize, thumb)
 	if err != nil {
+		remerr := os.Remove(filename)
+		if remerr != nil {
+			log.Log.Errorf("Error removing not media file: %v", remerr)
+		}
 		return nil, fmt.Errorf("Media creating gorm error: %v\n", err)
 	}
 	return model, nil
