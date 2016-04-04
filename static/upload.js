@@ -55,7 +55,6 @@ wsUploadFile = function(file) {
 			wsErrorProgress(row, result);
 		},
 		success: function(data) {
-			console.log("success", data);
 			if (data != "") {
 				wsErrorProgress(row, data);
 			} else {
