@@ -65,6 +65,18 @@ wsUploadFile = function(file) {
 	});
 }
 
+wsUploadOnChange = function(obj) {
+	if (obj.files.length) {
+		$("#ws-upload-select").text("Selected " + obj.files.length + " files");
+	} else {
+		$("#ws-upload-select").text("Select files");
+	}
+}
+
+wsUploadSelectFiles = function(obj) {
+	$("#ws-upload-file").trigger('click');
+}
+
 wsUpload = function(obj) {
 	var files = $("#ws-upload-file")[0].files;
 	

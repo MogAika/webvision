@@ -3,12 +3,13 @@
 </head><body id="ws-upload-page">
 <div class="container">
 	<div class="row">
-		<label class="file col-xs-8">
-			<input id="ws-upload-file" type="file" name="heh" multiple>
-			<span class="file-custom"></span>
+		<label class="col-xs-6">
+			<input type="file" id="ws-upload-file" onchange="wsUploadOnChange(this)" name="heh" style="display:none;" multiple>
+			<button type="button" id="ws-upload-select" class="btn btn-block" onclick="wsUploadSelectFiles(this)">Select files</button>
+			<!--<span class="file-custom"></span>-->
 		</label>
-		<div class="col-xs-4">
-			<button type="button" class="btn btn-block" onclick="wsUpload(this);">Send</button>
+		<div class="col-xs-6">
+			<button type="button" class="btn btn-block btn-primary" onclick="wsUpload(this)">Send</button>
 		</div>
 	</div>
 	<div id="uploads"></div>
