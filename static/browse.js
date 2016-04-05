@@ -1,6 +1,11 @@
 wsBrowseRequested = false;
 wsBrowseEnd = false;
 wsBrowseLoaded = -1;
+wsLastPlayedVideo = null;
+
+wsGetVideoBlock = function(url, adds) {
+	return '<video controls loop maximized ' + adds + '><source src="' + url + '"></video>';
+}
 
 wsBrowseInsert = function(o) {
 	var ptype = o.Type.split('/')[0];
@@ -9,15 +14,19 @@ wsBrowseInsert = function(o) {
 			var card = '<audio controls preload="none" loop><source src="' + o.Url + '"></audio>';
 			break;
 		case "video":
-			var card = '<video controls preload="none" loop maximized><source src="' + o.Url + '"></video>';
+			if (o.Thumb != null) {
+				var card = '<div class="ws-data-lazyvideo"><a href="' + o.Url + '"><img src="' + o.Thumb + '"/></a></div>';
+			} else {
+				var card = wsGetVideoBlock(o.Url, 'preload="meta"');
+			}
 			break;
 		case "image":
 			var card = '<img src="' + o.Url + '">';
 			break;
 	}
-	console.log(card);
 	card = $('<div class="ws-card"><div class="ws-data ws-data-' + ptype + '">' + card + '</div></div>');
 	card.insertBefore($("#ws-request-trigger"));
+	card.find(".ws-data-lazyvideo").click(wsLazyVideoOnClick);
 }
 
 wsRequestMedia = function() {
@@ -45,7 +54,26 @@ wsRequestMedia = function() {
 	});
 }
 
-$(function() {
+wsLazyVideoOnClick = function(ev) {
+	var current = $(ev.target).parent().parent().parent();
+	var src = current.find("a").attr("href");
+	
+	if (wsLastPlayedVideo != null) {
+		var player = wsLastPlayedVideo.find("video");
+		player.appendTo(current);
+		player.find("source").attr('src', src);
+		player[0].load();
+		wsLastPlayedVideo.find(".ws-data-lazyvideo").show();
+	} else {
+		current.append(wsGetVideoBlock(src, 'autoplay'));
+	}
+	
+	wsLastPlayedVideo = current;
+	wsLastPlayedVideo.find(".ws-data-lazyvideo").hide();
+	return false;
+};
+
+$(document).ready(function() {
 	wsRequestMedia();
 	$(document).scroll(function() {
 		if (!wsBrowseEnd && !wsBrowseRequested) {

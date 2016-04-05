@@ -53,12 +53,6 @@ func (a *App) Handler(h http.Handler) http.Handler {
 }
 
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	err := views.InitTemplates()
-	if err != nil {
-		log.Log.Emergencyf("Template loading error: %v", err)
-		views.ViewError(w, 500, "Template error", err.Error())
-	}
-
 	context.Set(r, "db", a.DB)
 	context.Set(r, "settings", a.Settings)
 	context.Set(r, "app", a)
