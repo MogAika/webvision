@@ -31,11 +31,11 @@ func isContentType(ct string) bool {
 	return len(ct) != 0 && strings.ToLower(ct) != "application/octet-stream" && strings.IndexRune(ct, '/') != 0
 }
 
-func generateThumb(set *settings.Settings, fname, ctype string) (path *string, err error) {
+func generateThumb(set *settings.Settings, fname, ctype string) (th *string, err error) {
 	switch ctype {
 	case "video":
 		videothumb := fname + ".png"
-		cmd := exec.Command(set.FFmpeg, "-i", fname, "-vf", "scale=w='min(640\\, iw):h=min(480\\, ih)'", "-vframes", "1", videothumb)
+		cmd := exec.Command(set.FFmpeg, "-i", path.Join(set.DataPath, fname), "-vf", "scale=w='min(640\\, iw):h=min(480\\, ih)'", "-vframes", "1", path.Join(set.DataPath, videothumb))
 		err = cmd.Start()
 		if err != nil {
 			log.Log.Errorf("Error create process %v (file %s:%s)", cmd, ctype, fname)
@@ -129,7 +129,8 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 		return model, ErrAlreadyUploaded
 	}
 
-	filename := path.Join(path.Dir(set.DataPath), hash[:1], fmt.Sprintf("%c_%s", mediatype[0], hash[1:]))
+	dbfilename := path.Join(hash[:1], fmt.Sprintf("%c_%s", mediatype[0], hash[1:]))
+	filename := path.Join(path.Dir(set.DataPath), dbfilename)
 
 	if err = os.MkdirAll(path.Dir(filename), 0666); err != nil {
 		return nil, err
@@ -140,12 +141,13 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 	}
 	tempneedremove = false
 
-	thumb, err := generateThumb(set, filename, mediatype)
+	thumb, err := generateThumb(set, dbfilename, mediatype)
 	if err != nil {
 		log.Log.Errorf("Error generating thumb for file %s: %v", filename, err)
+		return nil, err
 	}
 
-	model, err = model.New(db, filename, hash, contenttype, fsize, thumb)
+	model, err = model.New(db, dbfilename, hash, contenttype, fsize, thumb)
 	if err != nil {
 		remerr := os.Remove(filename)
 		if remerr != nil {

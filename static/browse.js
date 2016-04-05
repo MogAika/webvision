@@ -47,6 +47,10 @@ wsRequestMedia = function() {
 				if (obj.Id < wsBrowseLoaded || wsBrowseLoaded < 0) {
 					wsBrowseLoaded = obj.Id;
 				}
+				data[i].Url = "/data/" + data[i].Url;
+				if (data[i].Thumb != null) {
+					data[i].Thumb = "/data/" + data[i].Thumb;
+				}
 				wsBrowseInsert(obj);
 			}
 			wsBrowseRequested = false;
