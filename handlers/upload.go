@@ -38,13 +38,11 @@ func generateThumb(set *settings.Settings, fname, ctype string) (th *string, err
 		cmd := exec.Command(set.FFmpeg, "-i", path.Join(set.DataPath, fname), "-vf", "scale=w='min(640\\, iw):h=min(480\\, ih)'", "-vframes", "1", path.Join(set.DataPath, videothumb))
 		err = cmd.Start()
 		if err != nil {
-			log.Log.Errorf("Error create process %v (file %s:%s)", cmd, ctype, fname)
-			return
+			return nil, fmt.Errorf("Start process %v (file %s:%s)", err, ctype, fname)
 		}
 		err = cmd.Wait()
 		if err != nil {
-			log.Log.Errorf("Error wait process %v (file %s:%s)", cmd, ctype, fname)
-			return
+			return nil, fmt.Errorf("Wait process %v (file %s:%s)", err, ctype, fname)
 		}
 		return &videothumb, nil
 	}
@@ -141,7 +139,7 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 	}
 	tempneedremove = false
 
-	thumb, err := generateThumb(set, filename, mediatype)
+	thumb, err := generateThumb(set, dbfilename, mediatype)
 	if err != nil {
 		log.Log.Errorf("Error generating thumb for file %s: %v", filename, err)
 		return nil, err
