@@ -62,7 +62,7 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	context.Clear(r)
 }
 
-func (a *App) InitHttp() error {
+func (a *App) InitHttp() (err error) {
 	r := mux.NewRouter()
 
 	if a.Settings.Web.Url != "" {
@@ -86,15 +86,15 @@ func (a *App) InitHttp() error {
 		if host == "" {
 			host = ":443"
 		}
-		http.ListenAndServeTLS(host, a.Settings.Web.TlsCertFile, a.Settings.Web.TlsKeyFile, h)
+		err = http.ListenAndServeTLS(host, a.Settings.Web.TlsCertFile, a.Settings.Web.TlsKeyFile, h)
 	} else {
 		if host == "" {
 			host = ":80"
 		}
-		http.ListenAndServe(host, h)
+		err = http.ListenAndServe(host, h)
 	}
 
-	return nil
+	return err
 }
 
 type NotFoundHandler struct{}
