@@ -141,7 +141,7 @@ func ProcessFile(db *gorm.DB, rf multipart.File, contenttype string, set *settin
 	}
 	tempneedremove = false
 
-	thumb, err := generateThumb(set, dbfilename, mediatype)
+	thumb, err := generateThumb(set, filename, mediatype)
 	if err != nil {
 		log.Log.Errorf("Error generating thumb for file %s: %v", filename, err)
 		return nil, err
