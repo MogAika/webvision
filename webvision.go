@@ -16,9 +16,8 @@ func main() {
 			Params:  "_test.db",
 		},
 		Web: settings.WebSettings{
-			Host:        "127.0.0.1:8080",
-			Url:         "",
-			Tls:         true,
+			Host:        "",
+			TlsHost:     "127.0.0.1:4443",
 			TlsCertFile: "server.pem",
 			TlsKeyFile:  "server.key",
 		},

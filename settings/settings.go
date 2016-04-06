@@ -1,9 +1,8 @@
 package settings
 
 type WebSettings struct {
-	Host        string // 0.0.0.0:8080
-	Url         string // https://www.url.com
-	Tls         bool
+	Host        string // 0.0.0.0:80
+	TlsHost     string // 0.0.0.0:443
 	TlsCertFile string
 	TlsKeyFile  string
 }

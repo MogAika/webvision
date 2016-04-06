@@ -62,12 +62,8 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	context.Clear(r)
 }
 
-func (a *App) InitHttp() (err error) {
+func (a *App) InitHttp() error {
 	r := mux.NewRouter()
-
-	if a.Settings.Web.Url != "" {
-		r.Host(a.Settings.Web.Url)
-	}
 
 	r.NotFoundHandler = &NotFoundHandler{}
 
@@ -80,21 +76,20 @@ func (a *App) InitHttp() (err error) {
 
 	h := a.Handler(r)
 
-	host := a.Settings.Web.Host
+	httperror := make(chan error)
 
-	if a.Settings.Web.Tls {
-		if host == "" {
-			host = ":443"
-		}
-		err = http.ListenAndServeTLS(host, a.Settings.Web.TlsCertFile, a.Settings.Web.TlsKeyFile, h)
-	} else {
-		if host == "" {
-			host = ":80"
-		}
-		err = http.ListenAndServe(host, h)
+	if a.Settings.Web.Host != "" {
+		go func() {
+			httperror <- http.ListenAndServe(a.Settings.Web.Host, h)
+		}()
 	}
 
-	return err
+	if a.Settings.Web.TlsHost != "" {
+		go func() {
+			httperror <- http.ListenAndServeTLS(a.Settings.Web.TlsHost, a.Settings.Web.TlsCertFile, a.Settings.Web.TlsKeyFile, h)
+		}()
+	}
+	return <-httperror
 }
 
 type NotFoundHandler struct{}
