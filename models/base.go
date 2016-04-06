@@ -11,6 +11,5 @@ import (
 func Init(db *gorm.DB) {
 	db.AutoMigrate(
 		&Media{},
-		&Tag{},
 	)
 }

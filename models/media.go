@@ -18,8 +18,6 @@ type Media struct {
 	Thumbnail *string `xorm:"varchar(256)"`
 	Likes     int64   `xorm:"not null"`
 	Dislikes  int64   `xorm:"not null"`
-
-	Tags []Tag `gorm:"many2many:m2m_media_tag;"`
 }
 
 func (md *Media) New(db *gorm.DB, file, hash, ftype string, fsize int64, thumbnail *string) (*Media, error) {
@@ -50,17 +48,4 @@ func (md *Media) GetByHash(db *gorm.DB, hash string) (*Media, bool, error) {
 	} else {
 		return md, true, err
 	}
-}
-
-func (md *Media) TagsAdd(db *gorm.DB, tag *Tag) error {
-	return db.Model(md).Association("Tags").Append(tag).Error
-}
-
-func (md *Media) TagsGet(db *gorm.DB) (error, []Tag) {
-	var tags []Tag
-	return db.Model(md).Association("Tags").Find(&tags).Error, tags
-}
-
-func (md *Media) TagsRemove(db *gorm.DB, tag *Tag) error {
-	return db.Model(md).Association("Tags").Delete(tag).Error
 }
