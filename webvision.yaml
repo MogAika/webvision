@@ -1,0 +1,12 @@
+datapath: ./data/
+ffmpeg: ../ffmpeg-20160404-git-54c9146-win64-static/bin/ffmpeg.exe
+db:
+  dialect: sqlite3
+  params: _test.db
+web:
+  host: ""
+  tlshost: 127.0.0.1:4443
+  tlscertfile: server.pem
+  tlskeyfile: server.key
+secret: ""
+maxdatasize: 134217728
