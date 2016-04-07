@@ -27,7 +27,7 @@ wsBrowseInsert = function(o) {
 	card = $('<div class="ws-card"><div class="ws-data ws-data-' + ptype + '">' + card + '</div></div>');
 	card.insertBefore($("#ws-request-trigger"));
 	if (ptype == "video") {
-		card.find("div.ws-data-lazyvideo").click(wsLazyVideoOnClick);
+		card.find("ws-data-lazyvideo").click(wsLazyVideoOnClick);
 	}
 }
 
@@ -61,7 +61,10 @@ wsRequestMedia = function() {
 }
 
 wsLazyVideoOnClick = function(ev) {
-	var current = $(ev.target).parent().parent().parent();
+	var current = $(ev.target).parent();
+	while (!current.hasClass("ws-data-video"))
+		current = current.parent();
+	
 	var src = current.find("a").attr("href");
 	
 	if (wsLastPlayedVideo != null) {
