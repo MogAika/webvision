@@ -16,12 +16,20 @@ body {
 }
 
 .ws-data-video video,
-.ws-data-video .ws-data-lazyvideo,
-.ws-data-video .ws-data-lazyvideo img {
+.ws-data-video .ws-data-lazyvideo {
 	width: 100%;
     display: block;
     min-height: 8em;
     max-height: 32em;
+	margin: 0 auto;
+}
+
+.ws-data-video .ws-data-lazyvideo img {
+	display: block;
+	max-width: 100%;
+	min-height: 8em;
+    max-height: 32em;
+	min-width: 10em;
 	margin: 0 auto;
 }
 
