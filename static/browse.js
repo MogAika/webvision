@@ -27,7 +27,7 @@ wsBrowseInsert = function(o) {
 	card = $('<div class="ws-card"><div class="ws-data ws-data-' + ptype + '">' + card + '</div></div>');
 	card.insertBefore($("#ws-request-trigger"));
 	if (ptype == "video") {
-		card.find("ws-data-lazyvideo").click(wsLazyVideoOnClick);
+		card.find(".ws-data-lazyvideo").click(wsLazyVideoOnClick);
 	}
 }
 
