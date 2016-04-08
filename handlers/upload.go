@@ -35,7 +35,9 @@ func generateThumb(set *settings.Settings, fname, ctype string) (th *string, err
 	switch ctype {
 	case "video":
 		videothumb := fname + ".png"
-		cmd := exec.Command(set.FFmpeg, "-i", path.Join(set.DataPath, fname), "-vf", "scale=w='min(640\\, iw):h=min(480\\, ih)'", "-vframes", "1", path.Join(set.DataPath, videothumb))
+		cmd := exec.Command(set.FFmpeg, "-i", path.Join(set.DataPath, fname),
+			"-vf", `scale=w='min(1\,min(640/iw\,360/ih))*640':h=-1`,
+			"-vframes", "1", path.Join(set.DataPath, videothumb))
 		err = cmd.Start()
 		if err != nil {
 			return nil, fmt.Errorf("Start process %v (file %s:%s)", err, ctype, fname)
