@@ -52,7 +52,11 @@ func (md *Media) New(db *gorm.DB, file, hash, ftype string, fsize int64, thumbna
 
 func (md *Media) Get(db *gorm.DB, limit int) ([]Media, error) {
 	var media []Media
-	return media, db.Model(md).Limit(limit).Order("id DESC").Find(&media).Error
+	req := db.Model(md)
+	if limit != 0 {
+		req = req.Limit(limit)
+	}
+	return media, req.Order("id DESC").Find(&media).Error
 }
 
 func (md *Media) GetTo(db *gorm.DB, last_id int, limit int) ([]Media, error) {
@@ -84,15 +88,8 @@ func generateThumb(set *settings.Settings, fname, ctype string) (th *string, err
 		cmd := exec.Command(set.FFmpeg, "-i", path.Join(set.DataPath, fname),
 			"-vf", `scale=w='min(1\,min(640/iw\,360/ih))*640':h=-1`,
 			"-vframes", "1", path.Join(set.DataPath, videothumb))
-		err = cmd.Start()
-		if err != nil {
-			return nil, fmt.Errorf("Start process %v (file %s:%s)", err, ctype, fname)
-		}
-		err = cmd.Wait()
-		if err != nil {
-			return nil, fmt.Errorf("Wait process %v (file %s:%s)", err, ctype, fname)
-		}
-		return &videothumb, nil
+
+		return &videothumb, cmd.Run()
 	}
 	return
 }
@@ -215,11 +212,15 @@ func (md *Media) NewFromFile(db *gorm.DB, rf multipart.File, contenttype string,
 func (md *Media) GenerateThumbnail(db *gorm.DB, set *settings.Settings) (*string, error) {
 	// remove old thumbnail
 	if md.Thumbnail != nil {
-		if _, err := os.Stat(*md.Thumbnail); os.IsExist(err) {
-			err = os.Remove(*md.Thumbnail)
-			return nil, err
+		oldpath := path.Join(set.DataPath, *md.Thumbnail)
+		if _, err := os.Stat(oldpath); err == nil || os.IsExist(err) {
+			err = os.Remove(oldpath)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
+	// generate new
 	return generateThumb(set, md.File, mediaTypeFromContentType(md.Type))
 }
