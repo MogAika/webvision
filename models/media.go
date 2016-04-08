@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"os/exec"
@@ -96,7 +95,7 @@ func generateThumb(set *settings.Settings, fname, ctype string) (th *string, err
 
 var nextTempFileId uint32 = rand.Uint32()
 
-func (md *Media) NewFromFile(db *gorm.DB, rf multipart.File, contenttype string, set *settings.Settings) (*Media, error) {
+func (md *Media) NewFromFile(db *gorm.DB, rf io.Reader, contenttype string, set *settings.Settings) (*Media, error) {
 	tempFileName := path.Join(path.Dir(set.DataPath), fmt.Sprintf("_tmp_%v.tmp", atomic.AddUint32(&nextTempFileId, 1)))
 
 	of, err := os.Create(tempFileName)
