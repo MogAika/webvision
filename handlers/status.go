@@ -13,5 +13,5 @@ func HandlerStatus(w http.ResponseWriter, r *http.Request) {
 	usage := du.NewDiskUsage(set.DataPath)
 
 	fmt.Fprintf(w, `Storage use %vM/%vM (%v%%)`,
-		usage.Used()/1024/1024, usage.Size()/1024/1024, usage.Usage())
+		usage.Used()/1024/1024, usage.Size()/1024/1024, usage.Usage()*100.0)
 }
