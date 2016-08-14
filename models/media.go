@@ -58,6 +58,23 @@ func (md *Media) Get(db *gorm.DB, limit int) ([]Media, error) {
 	return media, req.Order("id DESC").Find(&media).Error
 }
 
+var randtype = false
+
+func (md *Media) GetRandom(db *gorm.DB) (*Media, error) {
+	media := &Media{}
+
+	rndfunc := "RAND()"
+	if randtype {
+		rndfunc = "RANDOM()"
+	}
+	if err := db.Model(md).Order(rndfunc).First(&media).Error; err != nil {
+		randtype = !randtype
+		return media, err
+	} else {
+		return media, err
+	}
+}
+
 func (md *Media) GetTo(db *gorm.DB, last_id int, limit int) ([]Media, error) {
 	var media []Media
 	return media, db.Model(md).Where("id < ?", last_id).Limit(limit).Order("id DESC").Find(&media).Error

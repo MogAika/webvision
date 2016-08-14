@@ -74,6 +74,7 @@ func (a *App) InitHttp() error {
 	r.HandleFunc("/upload", handlers.HandlerUploadGet).Methods("GET")
 	r.HandleFunc("/upload", handlers.HandlerUploadPost).Methods("POST")
 	r.HandleFunc("/status", handlers.HandlerStatus)
+	r.HandleFunc("/random", handlers.HandlerRandom)
 
 	h := a.Handler(r)
 
