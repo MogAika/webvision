@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"math/rand"
 	"net/http"
 	"path"
 
@@ -11,7 +12,7 @@ import (
 func HandlerRandom(w http.ResponseWriter, r *http.Request) {
 	db, set := VarsFromRequest(r)
 
-	md, err := (&models.Media{}).GetRandom(db)
+	md, err := (&models.Media{}).GetRandom(db, rand.Int31())
 	if err != nil {
 		views.ViewError(w, 500, "Internal error", err.Error())
 	} else {

@@ -27,7 +27,6 @@ var ErrIncorrectContentType = errors.New("Server support only image/video/audio 
 type Media struct {
 	ID        uint64 `gorm:"primary_key"`
 	CreatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
 
 	Type      string  `xorm:"not null varchar(128)"`
 	Hash      string  `xorm:"not null varchar(32)"`
@@ -58,17 +57,10 @@ func (md *Media) Get(db *gorm.DB, limit int) ([]Media, error) {
 	return media, req.Order("id DESC").Find(&media).Error
 }
 
-var randtype = false
-
-func (md *Media) GetRandom(db *gorm.DB) (*Media, error) {
+func (md *Media) GetRandom(db *gorm.DB, rnd int32) (*Media, error) {
 	media := &Media{}
 
-	rndfunc := "RAND()"
-	if randtype {
-		rndfunc = "RANDOM()"
-	}
-	if err := db.Model(md).Order(rndfunc).First(&media).Error; err != nil {
-		randtype = !randtype
+	if err := db.Model(md).Where("`id`=((? % (select count(*) from `media`))+1)", rnd).First(&media).Error; err != nil {
 		return media, err
 	} else {
 		return media, err
