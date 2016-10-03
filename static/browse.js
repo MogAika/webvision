@@ -1,5 +1,4 @@
 wsBrowseRequested = false;
-wsBrowseEnd = false;
 wsBrowseLoaded = -1;
 wsLastPlayedVideo = null;
 
@@ -32,10 +31,14 @@ wsBrowseInsert = function(o) {
 }
 
 wsRequestMedia = function() {
+	if (wsBrowseRequested) { return; }
 	wsBrowseRequested = true;
-	var data = wsBrowseLoaded != -1 ? ("s=" + wsBrowseLoaded) : "";
+	var data = {'count': 25};
+	if (wsBrowseLoaded !== -1) {
+		data['start'] = wsBrowseLoaded;
+	}
 	$.ajax({
-		url: "/",
+		url: "/api/query",
 		method: "get",
 		dataType: "json",
 		data: data,
@@ -85,7 +88,7 @@ wsLazyVideoOnClick = function(ev) {
 $(document).ready(function() {
 	wsRequestMedia();
 	$(document).scroll(function() {
-		if (!wsBrowseEnd && !wsBrowseRequested) {
+		if (!wsBrowseRequested) {
 			if (($(window).scrollTop() + $(window).height()) >= $("#ws-request-trigger").position().top - 512) {
 				wsRequestMedia();
 			}

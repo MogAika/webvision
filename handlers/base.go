@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/context"
 	"github.com/jinzhu/gorm"
 
 	"github.com/mogaika/webvision/settings"
@@ -12,7 +11,8 @@ import (
 )
 
 func VarsFromRequest(r *http.Request) (*gorm.DB, *settings.Settings) {
-	return context.Get(r, "db").(*gorm.DB), context.Get(r, "settings").(*settings.Settings)
+	ctx := r.Context()
+	return ctx.Value("db").(*gorm.DB), ctx.Value("settings").(*settings.Settings)
 }
 
 func HandlerNotFound(w http.ResponseWriter, r *http.Request) {

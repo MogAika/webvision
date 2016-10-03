@@ -4,7 +4,7 @@ db:
   dialect: sqlite3
   params: _test.db
 web:
-  host: ""
+  host: 0.0.0.0:8888
   tlshost: 127.0.0.1:4443
   tlscertfile: server.pem
   tlskeyfile: server.key

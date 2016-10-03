@@ -15,7 +15,7 @@ func HandlerUploadPost(w http.ResponseWriter, r *http.Request) {
 	db, set := VarsFromRequest(r)
 	r.Body = http.MaxBytesReader(w, r.Body, set.MaxDataSize)
 
-	f, fh, err := r.FormFile("heh")
+	f, fh, err := r.FormFile("fl")
 
 	if err == nil {
 		defer f.Close()

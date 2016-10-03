@@ -1,9 +1,9 @@
 package app
 
 import (
+	"context"
 	"net/http"
 
-	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 
@@ -53,13 +53,9 @@ func (a *App) Handler(h http.Handler) http.Handler {
 }
 
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	context.Set(r, "db", a.DB)
-	context.Set(r, "settings", a.Settings)
-	context.Set(r, "app", a)
-
-	a.Handlers.ServeHTTP(w, r)
-
-	context.Clear(r)
+	ctx := context.WithValue(r.Context(), "settings", a.Settings)
+	ctx = context.WithValue(ctx, "db", a.DB)
+	a.Handlers.ServeHTTP(w, r.WithContext(ctx))
 }
 
 func (a *App) InitHttp() error {
@@ -75,6 +71,10 @@ func (a *App) InitHttp() error {
 	r.HandleFunc("/upload", handlers.HandlerUploadPost).Methods("POST")
 	r.HandleFunc("/status", handlers.HandlerStatus)
 	r.HandleFunc("/random", handlers.HandlerRandom)
+
+	api := r.PathPrefix("/api").Subrouter()
+	api.HandleFunc("/query", handlers.HandlerApiQuery)
+	api.HandleFunc("/random", handlers.HandlerApiRandom)
 
 	h := a.Handler(r)
 

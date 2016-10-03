@@ -27,7 +27,7 @@ wsGetUploadElement = function(fname) {
 wsUploadFile = function(file) {
 	var fd = new FormData();
 	
-	fd.append('heh', file);
+	fd.append('fl', file);
 	
 	var row = wsGetUploadElement(file.name);
 	
