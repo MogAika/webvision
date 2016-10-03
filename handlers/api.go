@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"io"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/mogaika/webvision/log"
 	"github.com/mogaika/webvision/models"
-	"github.com/mogaika/webvision/views"
 )
 
 const (
@@ -60,6 +60,15 @@ func apiWrite(w http.ResponseWriter, data interface{}) {
 	w.Write(binData)
 }
 
+func apiError(w http.ResponseWriter, inerr interface{}) {
+	binData, err := json.Marshal(map[string]interface{}{"error": inerr})
+	if err != nil {
+		log.Log.Errorf("Error marshal responce: %v", err)
+		return
+	}
+	w.Write(binData)
+}
+
 func HandlerApiQuery(w http.ResponseWriter, r *http.Request) {
 	u, err := url.Parse(r.RequestURI)
 	if err != nil {
@@ -106,7 +115,44 @@ func HandlerApiRandom(w http.ResponseWriter, r *http.Request) {
 
 	md, err := (&models.Media{}).GetRandom(db, rand.Int31())
 	if err != nil {
-		views.ViewError(w, 500, "Internal error", err.Error())
+		apiError(w, err.Error())
+	} else {
+		apiWrite(w, new(ViewMedia).FromModel(md))
+	}
+}
+
+func HandlerApiUpload(w http.ResponseWriter, r *http.Request) {
+	db, set := VarsFromRequest(r)
+	r.Body = http.MaxBytesReader(w, r.Body, set.MaxDataSize)
+
+	f, fh, err := r.FormFile("fl")
+
+	var ff io.ReadCloser
+	ct := ""
+
+	if err != nil {
+		urlToUpload := r.FormValue("url")
+		if urlToUpload == "" {
+			apiError(w, err.Error())
+			return
+		}
+
+		fh, err := http.Get(urlToUpload)
+		if err != nil {
+			apiError(w, err.Error())
+			return
+		}
+		ff = fh.Body
+		ct = fh.Header.Get("Content-Type")
+	} else {
+		ff = f
+		ct = fh.Header.Get("Content-Type")
+	}
+
+	defer ff.Close()
+	md, err := (&models.Media{}).NewFromFile(db, ff, ct, set)
+	if err != nil {
+		apiError(w, err.Error())
 	} else {
 		apiWrite(w, new(ViewMedia).FromModel(md))
 	}

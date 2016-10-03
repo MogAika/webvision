@@ -1,16 +1,21 @@
-wsUpoladProgress = function(s, v) {
-	s.find("progress").css('width', v+'%').attr('value', v);
-}
-wsEndProgress = function(s) {
-	s.find("progress").css('width', 100+'%').attr('value', 100).addClass("progress-success");
-	s.find(".file_status").removeClass("text-primary").addClass("text-success").text("Uploaded");
-}
-wsErrorProgress = function(s, v) {
-	s.find("progress").css('width', 100+'%').attr('value', 100).addClass("progress-danger");
-	s.find(".file_status").removeClass("text-primary").addClass("text-danger").text("Error:" + v);
+function wsProgressPercent(s, v) {
+	s.find("progress").css('width', v+'%').val(v);
 }
 
-wsGetUploadElement = function(fname) {
+function wsProgressState(s, state, text) {
+	s.find("progress").css('width', 100+'%').attr('value', 100).removeClass("progress-info").addClass("progress-" + state);
+	s.find(".file_status").removeClass("text-primary").removeClass("text-info").addClass("text-" + state).text(text);
+}
+
+function wsProgressError(s, err) {
+	wsProgressState(s, "danger", "Error: " + err);
+}
+
+function wsProgressUploaded(s) {
+	wsProgressState(s, "success", "Uploaded");
+}
+
+function wsGetUploadElement(fname) {
 	return $('<div class="upload">\
 			<div class="row">\
 				<div class="col-xs-6 text-xs-right file_name">' + fname + '</div>\
@@ -24,7 +29,7 @@ wsGetUploadElement = function(fname) {
 		</div>');
 }
 
-wsUploadFile = function(file) {
+function wsUploadFile(file) {
 	var fd = new FormData();
 	
 	fd.append('fl', file);
@@ -32,7 +37,6 @@ wsUploadFile = function(file) {
 	var row = wsGetUploadElement(file.name);
 	
 	$("#uploads").append(row);
-	
 	$.ajax({
 		xhr: function() {
 			var xhr = new window.XMLHttpRequest();
@@ -40,31 +44,32 @@ wsUploadFile = function(file) {
 				if (evt.lengthComputable) {
 					var percentComplete = evt.loaded / evt.total;
 					percentComplete = percentComplete * 100;
-					wsUpoladProgress(row, percentComplete);
+					wsProgressPercent(row, percentComplete);
 				}
 			}, false);
 			return xhr;
 		},
-		url: "/upload",
+		url: "/api/upload",
+		dataType: "json",
 		method: "post",
 		data: fd,
 		processData: false,
 		contentType: false, 
 		mimeType: 'multipart/form-data', 
 		fail: function(result) {
-			wsErrorProgress(row, result);
+			wsProgressError(row, result);
 		},
 		success: function(data) {
-			if (data != "") {
-				wsErrorProgress(row, data);
+			if (data.error) {
+				wsProgressError(row, data.error);
 			} else {
-				wsEndProgress(row);
+				wsProgressUploaded(row);
 			}
 		},
 	});
 }
 
-wsUploadOnChange = function(obj) {
+function wsUploadOnChange(obj) {
 	if (obj.files.length) {
 		$("#ws-upload-select").text("Selected " + obj.files.length + " files");
 	} else {
@@ -72,11 +77,11 @@ wsUploadOnChange = function(obj) {
 	}
 }
 
-wsUploadSelectFiles = function(obj) {
+function wsUploadSelectFiles(obj) {
 	$("#ws-upload-file").trigger('click');
 }
 
-wsUpload = function(obj) {
+function wsUpload(obj) {
 	var files = $("#ws-upload-file")[0].files;
 	
 	if (!files.length) {
@@ -86,4 +91,52 @@ wsUpload = function(obj) {
 	for (var i = 0; i < files.length; i++) {
 		wsUploadFile(files[i]);
 	}
+}
+
+function isValidURL(str) {
+   var a  = document.createElement('a');
+   a.href = str;
+   return (a.host && a.host != window.location.host);
+}
+
+function wsUploadByUrlWarn(text) {
+	$warn = $("#ws-upload-url-warn");
+	if (text) {
+		$warn.text(text);
+		$warn.show();
+		$warn.parent().addClass("has-danger");
+	} else {
+		$warn.hide();
+		$warn.parent().removeClass("has-danger");
+	}
+}
+
+function wsUploadByUrl(obj) {
+	var url = $("#ws-upload-url").val();
+	if (!isValidURL(url)) {
+		wsUploadByUrlWarn('Not a valid url');
+		return;
+	}
+	wsUploadByUrlWarn();
+	
+	var row = wsGetUploadElement(url);
+	$("#uploads").append(row);
+	wsProgressState(row, "info", "Server downloading file");
+	
+	$.ajax({
+		url: "/api/upload",
+		dataType: "json",
+		data: {'url': url},
+		method: "get",
+		fail: function(result) {
+			wsProgressError(row, result);
+		},
+		success: function(data) {
+			if (data.error) {
+				wsProgressError(row, data.error);
+			} else {
+				wsProgressUploaded(row);
+			}
+		},
+	});
 }

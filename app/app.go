@@ -67,14 +67,14 @@ func (a *App) InitHttp() error {
 	r.PathPrefix("/data/").Handler(http.StripPrefix("/data/", http.FileServer(http.Dir(a.Settings.DataPath))))
 
 	r.HandleFunc("/", handlers.HandlerBrowse)
-	r.HandleFunc("/upload", handlers.HandlerUploadGet).Methods("GET")
-	r.HandleFunc("/upload", handlers.HandlerUploadPost).Methods("POST")
+	r.HandleFunc("/upload", handlers.HandlerUpload)
 	r.HandleFunc("/status", handlers.HandlerStatus)
 	r.HandleFunc("/random", handlers.HandlerRandom)
 
 	api := r.PathPrefix("/api").Subrouter()
 	api.HandleFunc("/query", handlers.HandlerApiQuery)
 	api.HandleFunc("/random", handlers.HandlerApiRandom)
+	api.HandleFunc("/upload", handlers.HandlerApiUpload)
 
 	h := a.Handler(r)
 

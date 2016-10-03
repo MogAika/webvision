@@ -1,5 +1,6 @@
 wsBrowseRequested = false;
 wsBrowseLoaded = -1;
+wsBrowseEnd = false;
 wsLastPlayedVideo = null;
 
 wsGetVideoBlock = function(url, adds) {
@@ -47,16 +48,20 @@ wsRequestMedia = function() {
 			wsBrowseRequested = false;
 		},
 		success: function(data) {
-			for (var i in data) {
-				var obj = data[i];
-				if (obj.Id < wsBrowseLoaded || wsBrowseLoaded < 0) {
-					wsBrowseLoaded = obj.Id;
+			if (data.length == 0) {
+				wsBrowseEnd = true;
+			} else {
+				for (var i in data) {
+					var obj = data[i];
+					if (obj.Id < wsBrowseLoaded || wsBrowseLoaded < 0) {
+						wsBrowseLoaded = obj.Id;
+					}
+					data[i].Url = "/data/" + data[i].Url;
+					if (data[i].Thumb != null) {
+						data[i].Thumb = "/data/" + data[i].Thumb;
+					}
+					wsBrowseInsert(obj);
 				}
-				data[i].Url = "/data/" + data[i].Url;
-				if (data[i].Thumb != null) {
-					data[i].Thumb = "/data/" + data[i].Thumb;
-				}
-				wsBrowseInsert(obj);
 			}
 			wsBrowseRequested = false;
 		},
@@ -88,7 +93,7 @@ wsLazyVideoOnClick = function(ev) {
 $(document).ready(function() {
 	wsRequestMedia();
 	$(document).scroll(function() {
-		if (!wsBrowseRequested) {
+		if (!wsBrowseRequested && !wsBrowseEnd) {
 			if (($(window).scrollTop() + $(window).height()) >= $("#ws-request-trigger").position().top - 512) {
 				wsRequestMedia();
 			}

@@ -1,23 +1,31 @@
 {{- define "upload" -}}
 {{- template "global-header" . -}}
-	<link href="/static/bootstrap-4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet">
-	<link href="/static/tether-1.2.0/css/tether.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="//cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.min.css">
 </head><body id="ws-upload-page">
 <div class="container">
 	<div class="row">
 		<label class="col-xs-6">
-			<input type="file" id="ws-upload-file" onchange="wsUploadOnChange(this)" name="heh" style="display:none;" multiple>
+			<input type="file" id="ws-upload-file" onchange="wsUploadOnChange(this)" name="fl" style="display:none;" multiple>
 			<button type="button" id="ws-upload-select" class="btn btn-block" onclick="wsUploadSelectFiles(this)">Select files</button>
 		</label>
 		<div class="col-xs-6">
 			<button type="button" class="btn btn-block btn-primary" onclick="wsUpload(this)">Upload</button>
 		</div>
 	</div>
+	<div class="form-group">
+		<div class="input-group">
+			<input type="text" id="ws-upload-url" class="form-control" placeholder="http://example.com/video.webm">
+			<span class="input-group-btn">
+				<button class="btn btn-secondary" type="button" onclick="wsUploadByUrl(this)">Upload</button>
+			</span>
+		</div>
+		<div id="ws-upload-url-warn" style="display:none;" class="form-control-feedback"></div>
+	</div>
 	<div id="uploads"></div>
 </div>
 {{- template "global-scripts" . -}}
-<script src="/static/tether-1.2.0/js/tether.min.js"></script>
-<script src="/static/bootstrap-4.0.0-alpha.2/js/bootstrap.min.js"></script>
+<script src="//www.atlasestateagents.co.uk/javascript/tether.min.js"></script>
+<script src="//cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.min.js"></script>
 <script src="/static/upload.js"></script>
 {{- template "global-footer" . -}}
 {{- end -}}
