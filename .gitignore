@@ -1,0 +1,6 @@
+*.exe
+*.key
+*.pem
+*.db
+/data/
+/old/
