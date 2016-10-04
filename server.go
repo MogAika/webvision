@@ -11,6 +11,8 @@ import (
 	"github.com/mogaika/webvision/log"
 )
 
+var configFileName string
+
 func loadConfig(filename string) *config.Config {
 	log.Log.Infof("Used config %s", filename)
 
@@ -30,11 +32,12 @@ func loadConfig(filename string) *config.Config {
 
 }
 
-func main() {
-	var configFileName string
-
+func init() {
 	flag.StringVar(&configFileName, "config", "config.yaml", "Path to configuration file")
-	flag.Parse()
+}
+
+func main() {
+	log.InitLog()
 
 	conf := loadConfig(configFileName)
 	if conf == nil {
