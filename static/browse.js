@@ -15,13 +15,13 @@ function wsBrowseInsert(o) {
 			break;
 		case "video":
 			if (o.Thumb != null) {
-				var card = '<div class="ws-data-lazyvideo"><a href="' + o.Url + '"><img src="' + o.Thumb + '"/></a></div>';
+				var card = '<div class="ws-data-lazyvideo"><a href="' + o.Url + '" style="background-image:url(\'' + o.Thumb + '\')"></a></div>';
 			} else {
 				var card = wsGetVideoBlock(o.Url, 'preload="meta"');
 			}
 			break;
 		case "image":
-			var card = '<img src="' + o.Url + '">';
+			var card = '<a style="background-image:url(\'' + o.Url + '\'" href="' + o.Url + '" onclick="return false;">';
 			break;
 	}
 	card = $('<div class="ws-card"><div class="ws-data ws-data-' + ptype + '">' + card + '</div></div>');
@@ -50,12 +50,12 @@ function wsRequestMedia() {
 		success: function(data) {
 			if (data.length == 0) {
 				wsBrowseEnd = true;
+				$("#ws-request-trigger").show();
 			} else {
 				for (var i in data) {
 					var obj = data[i];
 					if (obj.Id < wsBrowseLoaded || wsBrowseLoaded < 0) {
 						wsBrowseLoaded = obj.Id;
-						$("#ws-request-trigger").show();
 					}
 					data[i].Url = "/data/" + data[i].Url;
 					if (data[i].Thumb != null) {

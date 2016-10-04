@@ -26,16 +26,27 @@ body#ws-upload-page {
 	margin: 1px;
 }
 
+.ws-data-image,
 .ws-data-video,
 .ws-data-video video,
-.ws-data-video .ws-data-lazyvideo,
-.ws-data-video .ws-data-lazyvideo img,
-.ws-data-image img {
+.ws-data-lazyvideo {
 	display: block;
-	min-width: 20%;
-	max-width: 100%;
+	width: 100%;
 	height: 100%;
-	margin: 0 auto;
+}
+
+.ws-data-image a,
+.ws-data-lazyvideo a {
+	display: block;
+	width: 100%;
+	height: 100%;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+.ws-data-image a {
+	cursor: default !important;
 }
 
 .ws-data-lazyvideo {
