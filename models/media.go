@@ -17,8 +17,8 @@ import (
 
 	"github.com/jinzhu/gorm"
 
+	"github.com/mogaika/webvision/config"
 	"github.com/mogaika/webvision/log"
-	"github.com/mogaika/webvision/settings"
 )
 
 var ErrAlreadyUploaded = errors.New("File already uploaded on server")
@@ -89,7 +89,7 @@ func isContentType(ct string) bool {
 	return len(ct) != 0 && strings.ToLower(ct) != "application/octet-stream" && strings.IndexRune(ct, '/') != 0
 }
 
-func generateThumb(set *settings.Settings, fname, ctype string) (th *string, err error) {
+func generateThumb(set *config.Config, fname, ctype string) (th *string, err error) {
 	switch ctype {
 	case "video":
 		videothumb := fname + ".png"
@@ -104,7 +104,7 @@ func generateThumb(set *settings.Settings, fname, ctype string) (th *string, err
 
 var nextTempFileId uint32 = rand.Uint32()
 
-func (md *Media) NewFromFile(db *gorm.DB, rf io.Reader, contenttype string, set *settings.Settings) (*Media, error) {
+func (md *Media) NewFromFile(db *gorm.DB, rf io.Reader, contenttype string, set *config.Config) (*Media, error) {
 	tempFileName := path.Join(path.Dir(set.DataPath), fmt.Sprintf("_tmp_%v.tmp", atomic.AddUint32(&nextTempFileId, 1)))
 
 	of, err := os.Create(tempFileName)
@@ -217,7 +217,7 @@ func (md *Media) NewFromFile(db *gorm.DB, rf io.Reader, contenttype string, set 
 	return model, nil
 }
 
-func (md *Media) GenerateThumbnail(db *gorm.DB, set *settings.Settings) (*string, error) {
+func (md *Media) GenerateThumbnail(db *gorm.DB, set *config.Config) (*string, error) {
 	// remove old thumbnail
 	if md.Thumbnail != nil {
 		oldpath := path.Join(set.DataPath, *md.Thumbnail)

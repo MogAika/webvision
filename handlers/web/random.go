@@ -1,16 +1,17 @@
-package handlers
+package web
 
 import (
 	"math/rand"
 	"net/http"
 	"path"
 
+	"github.com/mogaika/webvision/helpers"
 	"github.com/mogaika/webvision/models"
 	"github.com/mogaika/webvision/views"
 )
 
 func HandlerRandom(w http.ResponseWriter, r *http.Request) {
-	db, set := VarsFromRequest(r)
+	db, conf := helpers.ContextGetVars(r.Context())
 
 	md, err := (&models.Media{}).GetRandom(db, rand.Int31())
 	if err != nil {
@@ -18,6 +19,6 @@ func HandlerRandom(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
 		w.Header().Set("Pragma", "no-cache")
-		http.ServeFile(w, r, path.Join(set.DataPath, md.File))
+		http.ServeFile(w, r, path.Join(conf.DataPath, md.File))
 	}
 }

@@ -1,4 +1,4 @@
-package handlers
+package api
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/mogaika/webvision/helpers"
 	"github.com/mogaika/webvision/log"
 	"github.com/mogaika/webvision/models"
 )
@@ -88,7 +89,7 @@ func HandlerApiQuery(w http.ResponseWriter, r *http.Request) {
 	var medias_data []ViewMedia
 	var md []models.Media
 
-	db, _ := VarsFromRequest(r)
+	db, _ := helpers.ContextGetVars(r.Context())
 	if start <= 0 {
 		md, err = (&models.Media{}).Get(db, count)
 	} else if start == 1 {
@@ -111,7 +112,7 @@ func HandlerApiQuery(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandlerApiRandom(w http.ResponseWriter, r *http.Request) {
-	db, _ := VarsFromRequest(r)
+	db, _ := helpers.ContextGetVars(r.Context())
 
 	md, err := (&models.Media{}).GetRandom(db, rand.Int31())
 	if err != nil {
@@ -122,8 +123,9 @@ func HandlerApiRandom(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandlerApiUpload(w http.ResponseWriter, r *http.Request) {
-	db, set := VarsFromRequest(r)
-	r.Body = http.MaxBytesReader(w, r.Body, set.MaxDataSize)
+	db, conf := helpers.ContextGetVars(r.Context())
+
+	r.Body = http.MaxBytesReader(w, r.Body, conf.MaxDataSize)
 
 	f, fh, err := r.FormFile("fl")
 
@@ -150,7 +152,7 @@ func HandlerApiUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer ff.Close()
-	md, err := (&models.Media{}).NewFromFile(db, ff, ct, set)
+	md, err := (&models.Media{}).NewFromFile(db, ff, ct, conf)
 	if err != nil {
 		apiError(w, err.Error())
 	} else {
