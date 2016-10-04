@@ -185,7 +185,7 @@ func (md *Media) NewFromFile(db *gorm.DB, rf io.Reader, contenttype string, set 
 	dbfilename := path.Join(hash[:1], fmt.Sprintf("%c_%s", mediatype[0], hash[1:]))
 	filename := path.Join(path.Dir(set.DataPath), dbfilename)
 
-	if err = os.MkdirAll(path.Dir(filename), 0666); err != nil {
+	if err = os.MkdirAll(path.Dir(filename), 0755); err != nil {
 		return nil, err
 	}
 
