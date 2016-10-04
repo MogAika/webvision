@@ -5,8 +5,8 @@
 <div class="container">
 	<div class="row">
 		<label class="col-xs-6">
-			<input type="file" id="ws-upload-file" onchange="wsUploadOnChange(this)" name="fl" style="display:none;" multiple>
-			<button type="button" id="ws-upload-select" class="btn btn-block" onclick="wsUploadSelectFiles(this)">Select files</button>
+			<input type="file" id="ws-upload-file" name="fl" style="display:none;" multiple>
+			<button type="button" id="ws-upload-select" class="btn btn-block">Select files</button>
 		</label>
 		<div class="col-xs-6">
 			<button type="button" class="btn btn-block btn-primary" onclick="wsUpload(this)">Upload</button>
@@ -16,7 +16,7 @@
 		<div class="input-group">
 			<input type="text" id="ws-upload-url" class="form-control" placeholder="http://example.com/video.webm">
 			<span class="input-group-btn">
-				<button class="btn btn-secondary" type="button" onclick="wsUploadByUrl(this)">Upload</button>
+				<button id="ws-upload-url-btn" class="btn btn-secondary" type="button">Upload</button>
 			</span>
 		</div>
 		<div id="ws-upload-url-warn" style="display:none;" class="form-control-feedback"></div>
