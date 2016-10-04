@@ -10,7 +10,6 @@ import (
 func InitRouter(r *mux.Router) {
 	r.HandleFunc("/", web.HandlerBrowse)
 	r.HandleFunc("/upload", web.HandlerUpload)
-	r.HandleFunc("/status", web.HandlerStatus)
 	r.HandleFunc("/random", web.HandlerRandom)
 
 	a := r.PathPrefix("/api").Subrouter()
