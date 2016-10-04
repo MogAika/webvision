@@ -3,11 +3,11 @@ wsBrowseLoaded = -1;
 wsBrowseEnd = false;
 wsLastPlayedVideo = null;
 
-wsGetVideoBlock = function(url, adds) {
+function wsGetVideoBlock(url, adds) {
 	return '<video controls loop maximized ' + adds + '><source src="' + url + '"></video>';
 }
 
-wsBrowseInsert = function(o) {
+function wsBrowseInsert(o) {
 	var ptype = o.Type.split('/')[0];
 	switch (ptype) {
 		case "audio":
@@ -31,7 +31,7 @@ wsBrowseInsert = function(o) {
 	}
 }
 
-wsRequestMedia = function() {
+function wsRequestMedia() {
 	if (wsBrowseRequested) { return; }
 	wsBrowseRequested = true;
 	var data = {'count': 25};
@@ -55,6 +55,7 @@ wsRequestMedia = function() {
 					var obj = data[i];
 					if (obj.Id < wsBrowseLoaded || wsBrowseLoaded < 0) {
 						wsBrowseLoaded = obj.Id;
+						$("#ws-request-trigger").show();
 					}
 					data[i].Url = "/data/" + data[i].Url;
 					if (data[i].Thumb != null) {
@@ -68,10 +69,11 @@ wsRequestMedia = function() {
 	});
 }
 
-wsLazyVideoOnClick = function(ev) {
+function wsLazyVideoOnClick(ev) {
 	var current = $(ev.target).parent();
-	while (!current.hasClass("ws-data-video"))
+	while (!current.hasClass("ws-data-video")) {
 		current = current.parent();
+	}
 	
 	var src = current.find("a").attr("href");
 	
@@ -87,10 +89,10 @@ wsLazyVideoOnClick = function(ev) {
 	
 	wsLastPlayedVideo = current;
 	wsLastPlayedVideo.find(".ws-data-lazyvideo").hide();
-	return false;
+	return false; 
 };
 
-$(document).ready(function() {
+$(function() {
 	wsRequestMedia();
 	$(document).scroll(function() {
 		if (!wsBrowseRequested && !wsBrowseEnd) {

@@ -6,6 +6,12 @@ body#ws-upload-page {
 	padding: 1em 0;
 }
 
+#ws-request-trigger {
+	font-size: 300%;
+	color: white;
+	font-family: sans;
+}
+
 .container {
 	width: auto;
 	margin: 0 auto;
