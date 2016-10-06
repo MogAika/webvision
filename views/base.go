@@ -13,6 +13,7 @@ func InitTemplates() (err error) {
 		"templates/errors.html",
 		"templates/browse.html",
 		"templates/upload.html",
+		"templates/random.html",
 	)
 	return
 }
@@ -35,6 +36,10 @@ func ViewError(w http.ResponseWriter, code int, title, text string) {
 
 func ViewBrowse(w http.ResponseWriter) {
 	Templates.ExecuteTemplate(w, "browse", nil)
+}
+
+func ViewRandom(w http.ResponseWriter) {
+	Templates.ExecuteTemplate(w, "random", nil)
 }
 
 type ViewUploadStruct struct {
