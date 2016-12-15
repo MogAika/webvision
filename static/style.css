@@ -35,8 +35,7 @@ body#ws-random-page {
 	background-color: #000;
 }
 
-#ws-browse-page .container,
-#ws-upload-page .container {
+#ws-browse-page .container {
 	width: auto;
 	margin: 0 auto;
 	text-align: center;

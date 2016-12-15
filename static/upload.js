@@ -18,13 +18,11 @@ function wsProgressUploaded(s) {
 function wsGetUploadElement(fname) {
 	return $('<div class="upload">\
 			<div class="row">\
-				<div class="col-xs-6 text-xs-right file_name">' + fname + '</div>\
-				<div class="col-xs-6 text-xs-left text-primary file_status">Uploading</div>\
+				<div class="col-sm-6 text-xs-right file_name">' + fname + '</div>\
+				<div class="col-sm-6 text-xs-left text-primary file_status">Uploading</div>\
 			</div>\
 			<div class="row">\
-				<div class="col-xs-12">\
-					<progress class="progress-striped progress" value="0" max="100"></progress>\
-				</div>\
+				<progress class="progress-striped progress" value="0" max="100"></progress>\
 			</div>\
 		</div>');
 }
