@@ -15,4 +15,8 @@ func NewGormLogger(l log.Logger) *GormLogger {
 	return &GormLogger{logger: l}
 }
 
-var Log = stdlog.GetFromFlags()
+var Log log.Logger
+
+func InitLog() {
+	Log = stdlog.GetFromFlags()
+}

@@ -3,11 +3,11 @@ wsBrowseLoaded = -1;
 wsBrowseEnd = false;
 wsLastPlayedVideo = null;
 
-wsGetVideoBlock = function(url, adds) {
+function wsGetVideoBlock(url, adds) {
 	return '<video controls loop maximized ' + adds + '><source src="' + url + '"></video>';
 }
 
-wsBrowseInsert = function(o) {
+function wsBrowseInsert(o) {
 	var ptype = o.Type.split('/')[0];
 	switch (ptype) {
 		case "audio":
@@ -15,13 +15,13 @@ wsBrowseInsert = function(o) {
 			break;
 		case "video":
 			if (o.Thumb != null) {
-				var card = '<div class="ws-data-lazyvideo"><a href="' + o.Url + '"><img src="' + o.Thumb + '"/></a></div>';
+				var card = '<div class="ws-data-lazyvideo"><a href="' + o.Url + '" style="background-image:url(\'' + o.Thumb + '\')"></a></div>';
 			} else {
 				var card = wsGetVideoBlock(o.Url, 'preload="meta"');
 			}
 			break;
 		case "image":
-			var card = '<img src="' + o.Url + '">';
+			var card = '<a style="background-image:url(\'' + o.Url + '\'" href="' + o.Url + '" onclick="return false;">';
 			break;
 	}
 	card = $('<div class="ws-card"><div class="ws-data ws-data-' + ptype + '">' + card + '</div></div>');
@@ -31,7 +31,7 @@ wsBrowseInsert = function(o) {
 	}
 }
 
-wsRequestMedia = function() {
+function wsRequestMedia() {
 	if (wsBrowseRequested) { return; }
 	wsBrowseRequested = true;
 	var data = {'count': 25};
@@ -50,6 +50,7 @@ wsRequestMedia = function() {
 		success: function(data) {
 			if (data.length == 0) {
 				wsBrowseEnd = true;
+				$("#ws-request-trigger").show();
 			} else {
 				for (var i in data) {
 					var obj = data[i];
@@ -68,10 +69,11 @@ wsRequestMedia = function() {
 	});
 }
 
-wsLazyVideoOnClick = function(ev) {
+function wsLazyVideoOnClick(ev) {
 	var current = $(ev.target).parent();
-	while (!current.hasClass("ws-data-video"))
+	while (!current.hasClass("ws-data-video")) {
 		current = current.parent();
+	}
 	
 	var src = current.find("a").attr("href");
 	
@@ -87,10 +89,10 @@ wsLazyVideoOnClick = function(ev) {
 	
 	wsLastPlayedVideo = current;
 	wsLastPlayedVideo.find(".ws-data-lazyvideo").hide();
-	return false;
+	return false; 
 };
 
-$(document).ready(function() {
+$(function() {
 	wsRequestMedia();
 	$(document).scroll(function() {
 		if (!wsBrowseRequested && !wsBrowseEnd) {

@@ -1,5 +1,7 @@
-*.exe
 *.key
 *.pem
 *.db
 /data/
+/webvision
+/webvision.exe
+/nohup.out

@@ -1,13 +1,12 @@
-package handlers
+package api
 
 import (
-	"encoding/json"
 	"io"
 	"math/rand"
 	"net/http"
 	"net/url"
-	"strconv"
 
+	"github.com/mogaika/webvision/helpers"
 	"github.com/mogaika/webvision/log"
 	"github.com/mogaika/webvision/models"
 )
@@ -31,44 +30,6 @@ func (vm *ViewMedia) FromModel(md *models.Media) *ViewMedia {
 	return vm
 }
 
-func stoi(vals url.Values, key string, pInt *int) bool {
-	v := vals.Get(key)
-	if v != "" {
-		ival, err := strconv.Atoi(v)
-		if err != nil {
-			log.Log.Errorf("Error parsing query val 's': %v", key, err)
-			return false
-		} else {
-			*pInt = ival
-		}
-	}
-	return true
-}
-
-func apiWrite(w http.ResponseWriter, data interface{}) {
-	binData, err := json.Marshal(data)
-	if err != nil {
-		log.Log.Errorf("Error marshal responce: %v", err)
-		return
-	}
-
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("Expires", "0")
-	w.Header().Set("Content-Type", JSON_CONTENT_TYPE)
-
-	w.Write(binData)
-}
-
-func apiError(w http.ResponseWriter, inerr interface{}) {
-	binData, err := json.Marshal(map[string]interface{}{"error": inerr})
-	if err != nil {
-		log.Log.Errorf("Error marshal responce: %v", err)
-		return
-	}
-	w.Write(binData)
-}
-
 func HandlerApiQuery(w http.ResponseWriter, r *http.Request) {
 	u, err := url.Parse(r.RequestURI)
 	if err != nil {
@@ -88,7 +49,7 @@ func HandlerApiQuery(w http.ResponseWriter, r *http.Request) {
 	var medias_data []ViewMedia
 	var md []models.Media
 
-	db, _ := VarsFromRequest(r)
+	db, _ := helpers.ContextGetVars(r.Context())
 	if start <= 0 {
 		md, err = (&models.Media{}).Get(db, count)
 	} else if start == 1 {
@@ -111,7 +72,7 @@ func HandlerApiQuery(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandlerApiRandom(w http.ResponseWriter, r *http.Request) {
-	db, _ := VarsFromRequest(r)
+	db, _ := helpers.ContextGetVars(r.Context())
 
 	md, err := (&models.Media{}).GetRandom(db, rand.Int31())
 	if err != nil {
@@ -122,8 +83,9 @@ func HandlerApiRandom(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandlerApiUpload(w http.ResponseWriter, r *http.Request) {
-	db, set := VarsFromRequest(r)
-	r.Body = http.MaxBytesReader(w, r.Body, set.MaxDataSize)
+	db, conf := helpers.ContextGetVars(r.Context())
+
+	r.Body = http.MaxBytesReader(w, r.Body, conf.MaxDataSize)
 
 	f, fh, err := r.FormFile("fl")
 
@@ -150,7 +112,7 @@ func HandlerApiUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer ff.Close()
-	md, err := (&models.Media{}).NewFromFile(db, ff, ct, set)
+	md, err := (&models.Media{}).NewFromFile(db, ff, ct, conf)
 	if err != nil {
 		apiError(w, err.Error())
 	} else {

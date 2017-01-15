@@ -18,13 +18,11 @@ function wsProgressUploaded(s) {
 function wsGetUploadElement(fname) {
 	return $('<div class="upload">\
 			<div class="row">\
-				<div class="col-xs-6 text-xs-right file_name">' + fname + '</div>\
-				<div class="col-xs-6 text-xs-left text-primary file_status">Uploading</div>\
+				<div class="col-sm-6 text-xs-right file_name">' + fname + '</div>\
+				<div class="col-sm-6 text-xs-left text-primary file_status">Uploading</div>\
 			</div>\
 			<div class="row">\
-				<div class="col-xs-12">\
-					<progress class="progress-striped progress" value="0" max="100"></progress>\
-				</div>\
+				<progress class="progress-striped progress" value="0" max="100"></progress>\
 			</div>\
 		</div>');
 }
@@ -69,19 +67,19 @@ function wsUploadFile(file) {
 	});
 }
 
-function wsUploadOnChange(obj) {
-	if (obj.files.length) {
-		$("#ws-upload-select").text("Selected " + obj.files.length + " files");
+function wsUploadOnChange() {
+	if (this.files.length) {
+		$("#ws-upload-select").text("Selected " + this.files.length + " files");
 	} else {
 		$("#ws-upload-select").text("Select files");
 	}
 }
 
-function wsUploadSelectFiles(obj) {
+function wsUploadSelectFiles() {
 	$("#ws-upload-file").trigger('click');
 }
 
-function wsUpload(obj) {
+function wsUpload() {
 	var files = $("#ws-upload-file")[0].files;
 	
 	if (!files.length) {
@@ -111,7 +109,7 @@ function wsUploadByUrlWarn(text) {
 	}
 }
 
-function wsUploadByUrl(obj) {
+function wsUploadOnUrlSubmit() {
 	var url = $("#ws-upload-url").val();
 	if (!isValidURL(url)) {
 		wsUploadByUrlWarn('Not a valid url');
@@ -119,6 +117,10 @@ function wsUploadByUrl(obj) {
 	}
 	wsUploadByUrlWarn();
 	
+	wsUploadByUrl(url);
+}
+
+function wsUploadByUrl(url) {
 	var row = wsGetUploadElement(url);
 	$("#uploads").append(row);
 	wsProgressState(row, "info", "Server downloading file");
@@ -140,3 +142,12 @@ function wsUploadByUrl(obj) {
 		},
 	});
 }
+
+$(function() {
+	$("#ws-upload-file").change(wsUploadOnChange);
+	$("#ws-upload-select").click(wsUploadSelectFiles);
+	$("#ws-upload-url").keyup(function(event) {
+	    if(event.keyCode == 13) { wsUploadOnUrlSubmit(); }
+	});
+	$("#ws-upload-url-btn").click(wsUploadOnUrlSubmit);
+});
