@@ -26,7 +26,7 @@ func stoi(vals url.Values, key string, pInt *int) bool {
 func apiWrite(w http.ResponseWriter, data interface{}) {
 	binData, err := json.Marshal(data)
 	if err != nil {
-		log.Log.Errorf("Error marshal responce: %v", err)
+		log.Log.Errorf("Error marshal response: %v", err)
 		return
 	}
 
@@ -41,7 +41,7 @@ func apiWrite(w http.ResponseWriter, data interface{}) {
 func apiError(w http.ResponseWriter, inerr interface{}) {
 	binData, err := json.Marshal(map[string]interface{}{"error": inerr})
 	if err != nil {
-		log.Log.Errorf("Error marshal responce: %v", err)
+		log.Log.Errorf("Error marshal response: %v", err)
 		return
 	}
 	w.Write(binData)
