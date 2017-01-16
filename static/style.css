@@ -13,7 +13,8 @@ body#ws-upload-page {
 	padding: 1em 0;
 }
 
-body#ws-random-page {
+body#ws-random-page,
+body#ws-login-page {
 	width: 100%;
 	height: 100%;
 	position: relative;
@@ -23,6 +24,19 @@ body#ws-random-page {
 	font-size: 300%;
 	color: white;
 	font-family: sans;
+}
+
+#ws-login-page .container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+#ws-login-page form {
+	display: block;
+	max-width: 50%;
 }
 
 #ws-random-page .container {

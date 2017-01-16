@@ -1,0 +1,15 @@
+{{- define "login" -}}
+{{- template "global-header" . -}}
+	<link href="/static/style.css" rel="stylesheet">
+</head>
+<body id="ws-login-page">
+<div class="container">
+	<form method="post">
+		<input type="text" name="secret" placeholder="secret"/>
+		<input type="submit" value="Login"/>
+	</form>
+</div>
+{{- template "global-scripts" . -}}
+<script src="/static/browse.js"></script>
+{{- template "global-footer" . -}}
+{{- end -}}

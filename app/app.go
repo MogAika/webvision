@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/securecookie"
 	"github.com/jinzhu/gorm"
 
 	"github.com/mogaika/webvision/config"
@@ -15,9 +16,10 @@ import (
 )
 
 type App struct {
-	DB       *gorm.DB
-	Config   *config.Config
-	Handlers http.Handler
+	DB           *gorm.DB
+	Config       *config.Config
+	Handlers     http.Handler
+	SecureCookie *securecookie.SecureCookie
 }
 
 func NewApp(conf *config.Config) (a *App, err error) {
@@ -27,6 +29,9 @@ func NewApp(conf *config.Config) (a *App, err error) {
 		return
 	}
 
+	a.SecureCookie = securecookie.New([]byte(conf.Cookie.HashKey), []byte(conf.Cookie.BlockKey))
+
+	log.Log.Info("Initializing db")
 	a.DB, err = gorm.Open(conf.DB.Dialect, conf.DB.Params)
 	if err != nil {
 		return
@@ -36,17 +41,33 @@ func NewApp(conf *config.Config) (a *App, err error) {
 	if log.Log.LogInfo() {
 		a.DB.LogMode(true)
 	}
-
-	log.Log.Info("Initializing db")
 	models.Init(a.DB)
 
+	log.Log.Info("Checking config")
+	a.PrintWarnings()
 	log.Log.Info("Starting server")
 	return a, a.InitHttp()
+}
+
+func (a *App) PrintWarnings() {
+	if a.Config.Secret == "" {
+		log.Log.Warningf("Site secret is not used")
+	}
+	hashKeyLen := len(a.Config.Cookie.HashKey)
+	if hashKeyLen != 32 && hashKeyLen != 64 {
+		log.Log.Warningf("Bad cookie hash key length (%d). Prefer use 32 or 64", hashKeyLen)
+	}
+	blockKeyLen := len(a.Config.Cookie.BlockKey)
+	if blockKeyLen != 16 && blockKeyLen != 24 && blockKeyLen != 32 {
+		log.Log.Warningf("Bad cookie block key length (%d). Prefer use 16, 24 or 32", blockKeyLen)
+	}
 }
 
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := context.WithValue(r.Context(), "conf", a.Config)
 	ctx = context.WithValue(ctx, "db", a.DB)
+	ctx = context.WithValue(ctx, "cs", a.SecureCookie)
+
 	a.Handlers.ServeHTTP(w, r.WithContext(ctx))
 }
 

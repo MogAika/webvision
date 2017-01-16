@@ -1,11 +1,24 @@
+# folder, where media will be stored
 datapath: ./data/
+# ffmpeg binary
 ffmpeg: /usr/bin/ffmpeg
 db:
+  # for mysql please provide ?charset=utf8&parseTime=True&loc=Local in dsn for proper work
   dialect: sqlite3
   params: _test.db
 web:
+  # if certfile or keyfile is listed, then host is tls
   host: 0.0.0.0:8888
   certfile: server.pem
   keyfile: server.key
-secret: ""
+cookie:
+  # hashkey's length is better if 32 or 64
+  hashkey: "thisisverysecretstring0123456789"
+  # block's key length must be 16, 24 or 32 bytes
+  blockkey: "thatthewayahahailikeblockchipers"
+  # cookie life time in seconds 3600=h, 86400=day
+  lifetime: 86400
+# max size of request
 maxdatasize: 134217728
+# server password
+secret: "secret"

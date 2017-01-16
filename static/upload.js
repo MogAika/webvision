@@ -143,11 +143,11 @@ function wsUploadByUrl(url) {
 	});
 }
 
-$(function() {
+window.onload = function() {
 	$("#ws-upload-file").change(wsUploadOnChange);
 	$("#ws-upload-select").click(wsUploadSelectFiles);
 	$("#ws-upload-url").keyup(function(event) {
 	    if(event.keyCode == 13) { wsUploadOnUrlSubmit(); }
 	});
 	$("#ws-upload-url-btn").click(wsUploadOnUrlSubmit);
-});
+};

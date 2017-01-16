@@ -23,6 +23,13 @@ func stoi(vals url.Values, key string, pInt *int) bool {
 	return true
 }
 
+func apiNoCache(w http.ResponseWriter) {
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
+	w.Header().Set("Content-Type", JSON_CONTENT_TYPE)
+}
+
 func apiWrite(w http.ResponseWriter, data interface{}) {
 	binData, err := json.Marshal(data)
 	if err != nil {
@@ -30,10 +37,7 @@ func apiWrite(w http.ResponseWriter, data interface{}) {
 		return
 	}
 
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("Expires", "0")
-	w.Header().Set("Content-Type", JSON_CONTENT_TYPE)
+	apiNoCache(w)
 
 	w.Write(binData)
 }
@@ -45,4 +49,9 @@ func apiError(w http.ResponseWriter, inerr interface{}) {
 		return
 	}
 	w.Write(binData)
+}
+
+func apiWriteCode(w http.ResponseWriter, code int) {
+	apiNoCache(w)
+	w.WriteHeader(code)
 }

@@ -53,8 +53,8 @@ function wsRequestRandomBlock() {
 	});
 }
 
-$(function() {
+window.onload = function() {
 	wsRequestRandomBlock();
 	wsRequestRandomBlock();
 	$("#ws-next-video-btn").click(wsNextVideoClick);
-});
+};

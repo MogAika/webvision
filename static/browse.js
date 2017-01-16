@@ -92,7 +92,7 @@ function wsLazyVideoOnClick(ev) {
 	return false; 
 };
 
-$(function() {
+window.onload = function() {
 	wsRequestMedia();
 	$(document).scroll(function() {
 		if (!wsBrowseRequested && !wsBrowseEnd) {
@@ -101,4 +101,4 @@ $(function() {
 			}
 		}
 	});
-});
+};

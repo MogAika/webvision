@@ -14,6 +14,7 @@ func InitTemplates() (err error) {
 		"templates/browse.html",
 		"templates/upload.html",
 		"templates/random.html",
+		"templates/login.html",
 	)
 	return
 }
@@ -56,4 +57,8 @@ func ViewUpload(w http.ResponseWriter, datausage string, datausagepercent float3
 
 func ViewUploadResult(w http.ResponseWriter, err string) {
 	w.Write([]byte(err))
+}
+
+func ViewLogin(w http.ResponseWriter) {
+	Templates.ExecuteTemplate(w, "login", nil)
 }

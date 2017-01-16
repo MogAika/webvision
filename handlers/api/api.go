@@ -119,3 +119,20 @@ func HandlerApiUpload(w http.ResponseWriter, r *http.Request) {
 		apiWrite(w, new(ViewMedia).FromModel(md))
 	}
 }
+
+func HandlerApiLogin(w http.ResponseWriter, r *http.Request) {
+	u, err := url.Parse(r.RequestURI)
+	if err != nil {
+		log.Log.Criticalf("Error parsing requested url: %v", err)
+		return
+	}
+
+	_, conf := helpers.ContextGetVars(r.Context())
+
+	if u.Query().Get("secret") == conf.Secret {
+		helpers.DoAuth(w, r, conf)
+		apiWriteCode(w, http.StatusOK)
+	} else {
+		apiWriteCode(w, http.StatusUnauthorized)
+	}
+}
