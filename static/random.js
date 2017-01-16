@@ -7,12 +7,15 @@ function wsBlockShow($bl) {
 }
 
 function wsNextVideoClick() {
-	$(".ws-random-card").first().remove();
+	var prevVideo = $(".ws-random-card").first();
+	var volume = prevVideo.find("video")[0].volume;
+	prevVideo.remove();
 	var nextVideo = $(".ws-random-card").first();
 	if (nextVideo.length) {
 		wsBlockShow(nextVideo);
 	}
 	wsRequestRandomBlock();
+	nextVideo.find("video")[0].volume = volume;
 }
 
 function wsCreateRandomBlock(o) {
