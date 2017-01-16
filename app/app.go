@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
@@ -46,6 +48,9 @@ func NewApp(conf *config.Config) (a *App, err error) {
 	log.Log.Info("Checking config")
 	a.PrintWarnings()
 	log.Log.Info("Starting server")
+
+	rand.Seed(time.Now().Unix())
+
 	return a, a.InitHttp()
 }
 
