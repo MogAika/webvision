@@ -14,7 +14,7 @@ func stoi(vals url.Values, key string, pInt *int) bool {
 	if v != "" {
 		ival, err := strconv.Atoi(v)
 		if err != nil {
-			log.Log.Errorf("Error parsing query val 's': %v", key, err)
+			log.Log.Errorf("Error parsing query val '%s': %v", key, err)
 			return false
 		} else {
 			*pInt = ival
