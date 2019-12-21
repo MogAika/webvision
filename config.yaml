@@ -4,6 +4,7 @@ datapath: ./data/
 ffmpeg: /usr/bin/ffmpeg
 db:
   # for mysql please provide ?charset=utf8&parseTime=True&loc=Local in dsn for proper work
+  # params: mediashares@tcp(localhost:3306)/mediashares?charset=utf8&parseTime=true
   dialect: sqlite3
   params: _test.db
 web:
