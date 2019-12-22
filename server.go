@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"io/ioutil"
+	"net/http"
 
 	"gopkg.in/yaml.v2"
 
@@ -37,6 +39,9 @@ func init() {
 }
 
 func main() {
+	// we do not care really
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
 	log.InitLog()
 
 	conf := loadConfig(configFileName)

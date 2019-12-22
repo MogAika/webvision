@@ -1,6 +1,7 @@
 package models
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/base64"
 	"errors"
@@ -97,7 +98,15 @@ func generateThumb(set *config.Config, fname, ctype string) (th *string, err err
 			"-vf", `scale=w='min(1\,min(640/iw\,360/ih))*640':h=-1`,
 			"-vframes", "1", path.Join(set.DataPath, videothumb))
 
-		return &videothumb, cmd.Run()
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		if err != nil {
+			return nil, fmt.Errorf("ffmpeg error: %v (%s)", err, stderr.String())
+		} else {
+			return &videothumb, nil
+		}
 	}
 	return
 }
@@ -183,7 +192,7 @@ func (md *Media) NewFromFile(db *gorm.DB, rf io.Reader, contenttype string, set 
 	}
 
 	dbfilename := path.Join(hash[:1], fmt.Sprintf("%c_%s", mediatype[0], hash[1:]))
-	filename := path.Join(path.Dir(set.DataPath), dbfilename)
+	filename := path.Join(set.DataPath, dbfilename)
 
 	if err = os.MkdirAll(path.Dir(filename), 0755); err != nil {
 		return nil, err
